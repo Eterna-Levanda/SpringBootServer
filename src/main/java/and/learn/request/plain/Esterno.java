@@ -1,4 +1,4 @@
-package and.learn.request;
+package and.learn.request.plain;
 
 import jakarta.validation.Valid;
 import lombok.Data;

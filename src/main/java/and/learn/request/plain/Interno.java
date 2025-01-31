@@ -1,4 +1,4 @@
-package and.learn.request;
+package and.learn.request.plain;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
 import jakarta.validation.constraints.Max;
