@@ -3,8 +3,12 @@ package and.learn.controller;
 import and.learn.request.plain.Esterno;
 import and.learn.request.propsrinominate.EsternoPropsRinominate;
 import jakarta.validation.Valid;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+
+import java.util.Optional;
 
 @RestController("nomeBeanCrudController")
 @RequestMapping("/Controller")
@@ -108,15 +112,37 @@ public class Controller {
         return esterno;
     }
 
+    /*
+    * http://localhost:8080/Controller/getStatusCode?statusCode=201
+    * */
+    @GetMapping("/getStatusCode")
+    public ResponseEntity<String> getStatusCode(@RequestParam Optional<Integer> statusCode){
+        return statusCode
+                //se status code è valorizzato esegue solo questo
+                .map(integer -> ResponseEntity.status(integer).body("Restituisco lo stato che mi hai chiesto, ovvero: " + integer))
+                //se status code è vuoto viene eseguito questo, che restituisce sempre un ResponseEntity ma in modo diverso
+                .orElseGet(() -> new ResponseEntity<>("Restituisco lo status code di defaul: 200", HttpStatus.OK));
+
+        /*
+        L'istruzione sopra è assolutamente equivalente a fare questo
+        if(statusCode.isPresent()) {
+            return ResponseEntity.status(statusCode.get()).body("Restituisco lo stato che mi hai chiesto, ovvero: " + statusCode.get());
+        } else {
+            //questo è un altro modo per impostare uno status code, meno bello secondo me
+            return new ResponseEntity<>("Restituisco lo status code di defaul: 200", HttpStatus.OK);
+        }*/
+    }
+
+
+
 
 
     /*TODO
      * 1) www-url-encoded (FATTO)
      * 2) Cambiare il nome delle variabili dal json alla variabile java (FATTO)
-     * 3) Output complesso formattando le date
-     * 4) Settare lo status code
-     * 5) Param Header
-     * 6) Impostare un catturatore di eccezioni
-     * 7) yml e lettore di properties
+     * 3) Settare lo status code (FATTO)
+     * 4) Param Header
+     * 5) Impostare un catturatore di eccezioni
+     * 6) yml e lettore di properties
      * */
 }
