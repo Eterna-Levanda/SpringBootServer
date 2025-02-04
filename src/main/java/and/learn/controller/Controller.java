@@ -3,6 +3,7 @@ package and.learn.controller;
 import and.learn.request.plain.Esterno;
 import and.learn.request.propsrinominate.EsternoPropsRinominate;
 import jakarta.validation.Valid;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -15,9 +16,9 @@ import java.util.Optional;
 public class Controller {
 
     /*
-    * METODI CON LAVORI SUI PARAMETRI IN INPUT
-    *
-    * */
+     * METODI CON LAVORI SUI PARAMETRI IN INPUT
+     *
+     * */
     @GetMapping("/get")
     //http://localhost:8080
     public String get() {
@@ -25,9 +26,9 @@ public class Controller {
     }
 
     /*
-    * http://localhost:8080/Controller/getWithRequestParams?valueString=prova&integer=45&bool=true
-    * RequestParam opzionali
-    * */
+     * http://localhost:8080/Controller/getWithRequestParams?valueString=prova&integer=45&bool=true
+     * RequestParam opzionali
+     * */
     @GetMapping("/getWithRequestParams")
     public String getWithRequestParams(
             //definisco solo la variabile, quindi il nome sarà il nome del parametro sarà uguale al nome della variabile e l'obbligatorietà è true
@@ -45,7 +46,7 @@ public class Controller {
     */
     @GetMapping("/getWithPathParams/{param}/{param2}")
     public String getWithPathParams(@PathVariable String param,
-                                    @PathVariable(value = "param2") Integer paramInteger){
+                                    @PathVariable(value = "param2") Integer paramInteger) {
         return "getWithPathParams. param = " + param + ", param2 = " + paramInteger;
     }
 
@@ -53,12 +54,12 @@ public class Controller {
     http://localhost:8080/Controller/getWithPathParamsOptional/ciao/erre
     * PathVariable (detto anche pathParam con altre librerie) opzionali con rinomina dei parametri
     * */
-    @GetMapping(value = { "/getWithPathParamsOptional", "/getWithPathParamsOptional/{param}", "/getWithPathParamsOptional/{param}/{anotherParam}" })
+    @GetMapping(value = {"/getWithPathParamsOptional", "/getWithPathParamsOptional/{param}", "/getWithPathParamsOptional/{param}/{anotherParam}"})
     public String getWithPathParamsOptional(@PathVariable(required = false) String param,
                                             @PathVariable(name = "anotherParam", required = false) String param2) {
         if (param == null) {
             return "param null";
-        } else if(param2 == null){
+        } else if (param2 == null) {
             return "param = " + param;
         } else {
             return "param = " + param + ", anotherParam = " + param2;
@@ -83,14 +84,14 @@ public class Controller {
        Content-type = application/json
      * */
     @PostMapping("/postRequestBody")
-    public Esterno postComplesso(@RequestBody(required = false) @Valid Esterno esterno){
+    public Esterno postComplesso(@RequestBody(required = false) @Valid Esterno esterno) {
         return esterno;
     }
 
     /*
     http://localhost:8080/Controller/postParamFormUrlEncoded
     * Parametri passati nel body con x-www-form-urlencoded*/
-    @PostMapping(value= "/postParamFormUrlEncoded", consumes = MediaType.APPLICATION_FORM_URLENCODED_VALUE)
+    @PostMapping(value = "/postParamFormUrlEncoded", consumes = MediaType.APPLICATION_FORM_URLENCODED_VALUE)
     public String postParamFormUrlEncoded(@RequestParam String param) {
         return "postParamFormUrlEncoded. Ricevuto param = " + param;
     }
@@ -113,10 +114,10 @@ public class Controller {
     }
 
     /*
-    * http://localhost:8080/Controller/getStatusCode?statusCode=201
-    * */
+     * http://localhost:8080/Controller/getStatusCode?statusCode=201
+     * */
     @GetMapping("/getStatusCode")
-    public ResponseEntity<String> getStatusCode(@RequestParam Optional<Integer> statusCode){
+    public ResponseEntity<String> getStatusCode(@RequestParam Optional<Integer> statusCode) {
         return statusCode
                 //se status code è valorizzato esegue solo questo
                 .map(integer -> ResponseEntity.status(integer).body("Restituisco lo stato che mi hai chiesto, ovvero: " + integer))
@@ -133,6 +134,21 @@ public class Controller {
         }*/
     }
 
+    /*  Prende in input nell'header un parametro chiamato "paramHeaderRequest" e lo restituisce con lo stesso valore nella response con il nome "paramHeaderResponse"
+     *  http://localhost:8080/Controller/headerParamsRequestResponse
+     * */
+    @GetMapping("/headerParamsRequestResponse")
+    public ResponseEntity<String> headerParamsInOut(@RequestHeader(value = "paramHeaderRequest", required = false) String paramHeader) {
+
+        //restituisco il valore ricevuto nella request cambiando solo il nome del parametro nella response header
+        HttpHeaders responseHeaders = new HttpHeaders();
+        responseHeaders.set("paramHeaderResponse", paramHeader);
+
+        return ResponseEntity.ok()
+                .headers(responseHeaders)
+                .body(null);
+    }
+
 
 
 
@@ -141,8 +157,9 @@ public class Controller {
      * 1) www-url-encoded (FATTO)
      * 2) Cambiare il nome delle variabili dal json alla variabile java (FATTO)
      * 3) Settare lo status code (FATTO)
-     * 4) Param Header
+     * 4) Param Header su singola api (FATTO) e tutte le api
      * 5) Impostare un catturatore di eccezioni
-     * 6) yml e lettore di properties
+     * 6) @WebFilter("/filter-response-header/*") public class AddResponseHeaderFilter implements Filter {
+     * 7) yml e lettore di properties
      * */
 }
