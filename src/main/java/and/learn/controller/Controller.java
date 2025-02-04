@@ -149,6 +149,37 @@ public class Controller {
                 .body(null);
     }
 
+    //GESTIONE ECCEZIONI VALIDO SOLO PER QUESTO CONTROLLER
+    @ExceptionHandler(IllegalArgumentException.class)
+    public ResponseEntity<String> handleIllegalArgument(IllegalArgumentException ex) {
+        return ResponseEntity.badRequest().body("Errore catturato all'interno del controller: " + ex.getMessage());  // HTTP 400
+    }
+
+    /*  Lancia un'eccezione che viene catturata dal ExceptionHandler definito in questa classe
+     *  http://localhost:8080/Controller/catchIllegalArgumentException
+     * */
+    @GetMapping("/catchIllegalArgumentException")
+    public void catchIllegalArgumentException(){
+        throw new IllegalArgumentException("Eccezione generata nell'api /catchIllegalArgumentException");
+    }
+
+    /*  Lancia un'eccezione che viene catturata dalla classe globale ExceptionsHandler
+     *  http://localhost:8080/Controller/catchNullPointerException
+     * */
+    @GetMapping("/catchNullPointerException")
+    public void catchNullPointerException(){
+        throw new NullPointerException("Eccezione generata nell'api /catchNullPointerException e verrà catturata nell'ExceptionsHandler globale");
+    }
+
+    /*  Lancia un'eccezione specifica che non ha un catturatore dedicato come nei casi precendenti,
+        nè in questa classe nè nella classe globale ExceptionsHandler,
+        ma verrà comunque catturata da ExceptionsHandler nel metodo che definisce la generica Exception
+     *  http://localhost:8080/Controller/catchQualunqueAltraException
+     * */
+    @GetMapping("/catchQualunqueAltraException")
+    public void catchQualunqueAltraException(){
+        throw new IndexOutOfBoundsException("Eccezione generata nell'api /catchQualunqueAltraException e verrà catturata nell'ExceptionsHandler globale");
+    }
 
 
 
@@ -157,9 +188,9 @@ public class Controller {
      * 1) www-url-encoded (FATTO)
      * 2) Cambiare il nome delle variabili dal json alla variabile java (FATTO)
      * 3) Settare lo status code (FATTO)
-     * 4) Param Header su singola api (FATTO) e tutte le api
-     * 5) Impostare un catturatore di eccezioni
-     * 6) @WebFilter("/filter-response-header/*") public class AddResponseHeaderFilter implements Filter {
-     * 7) yml e lettore di properties
+     * 4) Param Header su singola api (FATTO) e tutte le api tramite filtro(FATTO)
+     * 5) Impostare un catturatore di eccezioni (FATTO)
+     * 6) yml e lettore di properties
+     * 7) Future e Retryable
      * */
 }
