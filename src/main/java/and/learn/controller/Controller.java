@@ -3,6 +3,7 @@ package and.learn.controller;
 import and.learn.request.plain.Esterno;
 import and.learn.request.propsrinominate.EsternoPropsRinominate;
 import jakarta.validation.Valid;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
@@ -14,6 +15,7 @@ import java.util.Optional;
 @RestController("nomeBeanCrudController")
 @RequestMapping("/Controller")
 public class Controller {
+
 
     /*
      * METODI CON LAVORI SUI PARAMETRI IN INPUT
@@ -180,8 +182,16 @@ public class Controller {
     public void catchQualunqueAltraException(){
         throw new IndexOutOfBoundsException("Eccezione generata nell'api /catchQualunqueAltraException e verrà catturata nell'ExceptionsHandler globale");
     }
+    //FINE API DI CATCH EXCEPTION
 
+    @Value("${nome.ambiente:nome non settato}")
+    private String nomeAmbiente;
 
+    @GetMapping("/readSingleProp")
+    public String readSingleProp() {
+        //settare la variabile d'ambiente spring_profiles_active=ambiente1
+        return "valore della property 'nome.ambiente' = " + nomeAmbiente + " , variabile d'ambiente 'spring_profiles_active' = "+System.getenv("spring_profiles_active");
+    }
 
 
     /*TODO
@@ -190,7 +200,7 @@ public class Controller {
      * 3) Settare lo status code (FATTO)
      * 4) Param Header su singola api (FATTO) e tutte le api tramite filtro(FATTO)
      * 5) Impostare un catturatore di eccezioni (FATTO)
-     * 6) yml e lettore di properties
+     * 6) yml e lettore di properties singolo (FATTO) e multiplo
      * 7) Future e Retryable
      * */
 }
