@@ -1,2 +1,10 @@
 nome:
   ambiente: ambiente default
+serie-prop:
+  prop11: valore String
+  prop12:
+    prop121: 121
+  prop2: 1.2
+  data: 23/12/1980
+
+

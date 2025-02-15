@@ -1,9 +1,12 @@
 package and.learn.controller;
 
+import and.learn.config.PropertyReader;
 import and.learn.request.plain.Esterno;
 import and.learn.request.propsrinominate.EsternoPropsRinominate;
 import jakarta.validation.Valid;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.core.env.Environment;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
@@ -187,10 +190,42 @@ public class Controller {
     @Value("${nome.ambiente:nome non settato}")
     private String nomeAmbiente;
 
+    /*  Mostra il valore della property "nome.ambiente"
+     *  http://localhost:8080/Controller/readSingleProp
+     * */
     @GetMapping("/readSingleProp")
     public String readSingleProp() {
         //settare la variabile d'ambiente spring_profiles_active=ambiente1
         return "valore della property 'nome.ambiente' = " + nomeAmbiente + " , variabile d'ambiente 'spring_profiles_active' = "+System.getenv("spring_profiles_active");
+    }
+
+
+    //mi serve per leggere le property usando la classe Environment di Spring
+    @Autowired
+    private Environment environment;
+
+    /*  Usa la classe Environment per mostrare il valore della property "nome.ambiente"
+     *  http://localhost:8080/Controller/readSinglePropUsingEnvironment
+     * */
+    @GetMapping("/readSinglePropUsingEnvironment")
+    public String readSinglePropUsingEnvironment() {
+        //settare la variabile d'ambiente spring_profiles_active=ambiente1
+        return "valore della property 'nome.ambiente' letta tramite classe Environment = " + environment.getProperty("nome.ambiente");
+
+        /*NB: questa istruzione restituisce null perchè "spring_profiles_active" è una variabile d'ambiente,
+        mentre la classe Environment legge solo le properties degli yml
+        environment.getProperty("spring_profiles_active")*/
+    }
+
+    @Autowired
+    PropertyReader propertyReader;
+
+    /*  Usa la classe PropertyReader interna al progetto per mostrare i valori delle properties che contiene
+     *  http://localhost:8080/Controller/readMultiProps
+     * */
+    @GetMapping("/readMultiProps")
+    public String readMultiProps(){
+        return propertyReader.getProp11() + " " + propertyReader.getProp2() + " " + propertyReader.getProp12().getProp121() + " " + propertyReader.getData();
     }
 
 
@@ -200,7 +235,7 @@ public class Controller {
      * 3) Settare lo status code (FATTO)
      * 4) Param Header su singola api (FATTO) e tutte le api tramite filtro(FATTO)
      * 5) Impostare un catturatore di eccezioni (FATTO)
-     * 6) yml e lettore di properties singolo (FATTO) e multiplo
+     * 6) yml e lettore di properties singolo (FATTO) e multiplo (FATTO)
      * 7) Future e Retryable
      * */
 }
