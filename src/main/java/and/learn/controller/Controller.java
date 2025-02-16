@@ -4,6 +4,7 @@ import and.learn.config.PropertyReader;
 import and.learn.request.plain.Esterno;
 import and.learn.request.propsrinominate.EsternoPropsRinominate;
 import jakarta.validation.Valid;
+import lombok.extern.log4j.Log4j2;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.env.Environment;
@@ -15,6 +16,7 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.Optional;
 
+@Log4j2
 @RestController("nomeBeanCrudController")
 @RequestMapping("/Controller")
 public class Controller {
@@ -228,6 +230,20 @@ public class Controller {
         return propertyReader.getProp11() + " " + propertyReader.getProp2() + " " + propertyReader.getProp12().getProp121() + " " + propertyReader.getData();
     }
 
+    /*  Serve a loggare
+     *  http://localhost:8080/Controller/log
+     * */
+    @GetMapping("/log")
+    public String log(){
+        log.trace("log di livello trace");//trace è il livewllo di log più fine
+        log.debug("log di livello debug");//debug è il livello più comprensivo, se setti questo livello vedi tutto, trane trace
+        log.info("log di livello info");//se setti info non vedrai debug
+        log.warn("log di livello warn");//se setti warn, non vedrai info e debug
+        log.error("log di livello error");//se setti error, vedrai solo error e fatal
+        log.fatal("log di livello fatal");//se setti fatal, vedrai solo fatal
+        return "Log presenti in: " + environment.getProperty("logging.file.name");
+    }
+
 
     /*TODO
      * 1) www-url-encoded (FATTO)
@@ -236,6 +252,9 @@ public class Controller {
      * 4) Param Header su singola api (FATTO) e tutte le api tramite filtro(FATTO)
      * 5) Impostare un catturatore di eccezioni (FATTO)
      * 6) yml e lettore di properties singolo (FATTO) e multiplo (FATTO)
-     * 7) Future e Retryable
+     * 7) Log
+     * 8) Actuator
+     * 9) Future e Retryable
+     *
      * */
 }

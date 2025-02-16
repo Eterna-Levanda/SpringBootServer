@@ -7,4 +7,16 @@ serie-prop:
   prop2: 1.2
   data: 23/12/1980
 
+logging:
+  level:
+    root: INFO    # Livello di log generale
+    and.learn: DEBUG   # Livello di log personalizzato per il mio package
+  file:
+    name: ${user.home}/log/SpringBootServer.log   # Percorso del file di log
+    max-size: 5MB       # Dimensione massima prima della rotazione
+    max-history: 5       # Numero massimo di file storici
+  pattern:
+    file:    "%d{yyyy-MM-dd HH:mm:ss} %-5level %logger{50}.%M - Line:%L - %msg%n"
+    console: "%d{yyyy-MM-dd HH:mm:ss} %-5level %logger{50}.%M - Line:%L - %msg%n"
+
 
