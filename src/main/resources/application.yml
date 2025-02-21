@@ -19,4 +19,16 @@ logging:
     file:    "%d{yyyy-MM-dd HH:mm:ss} %-5level %logger{50}.%M - Line:%L - %msg%n"
     console: "%d{yyyy-MM-dd HH:mm:ss} %-5level %logger{50}.%M - Line:%L - %msg%n"
 
+#Actuator
+management:
+  endpoints:
+    web:
+      exposure:
+        include: "health,info,loggers" #  Altrimenti per abilitare tutti gli endpoint Actuator metti "*"
+  endpoint:
+    health:
+      show-details: always  # Mostra dettagli nei controlli di stato
+    metrics:
+      enabled: true  # Abilita metriche avanzate
+
 
