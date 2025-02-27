@@ -24,11 +24,12 @@ management:
   endpoints:
     web:
       exposure:
-        include: "health,info,loggers" #  Altrimenti per abilitare tutti gli endpoint Actuator metti "*"
+        include: health, info, loggers #  Altrimenti per abilitare tutti gli endpoint Actuator metti "*"
   endpoint:
     health:
-      show-details: always  # Mostra dettagli nei controlli di stato
-    metrics:
-      enabled: true  # Abilita metriche avanzate
-
-
+      show-details: ALWAYS  # Mostra dettagli nei controlli di stato. Per dettagli si intende gli indicatori di default e quelli personalizzati
+    loggers:
+      enabled: true
+  health:
+    defaults:
+      enabled: false  # Disabilita tutti gli indicatori di default che offre Spring, se metti true compare qualche info in più
