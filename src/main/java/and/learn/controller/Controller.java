@@ -235,12 +235,12 @@ public class Controller {
      * */
     @GetMapping("/log")
     public String log(){
-        log.trace("log di livello trace");//trace è il livewllo di log più fine
+        log.trace("log di livello trace");//trace è il livello di log più fine
         log.debug("log di livello debug");//debug è il livello più comprensivo, se setti questo livello vedi tutto, trane trace
         log.info("log di livello info");//se setti info non vedrai debug
         log.warn("log di livello warn");//se setti warn, non vedrai info e debug
-        log.error("log di livello error");//se setti error, vedrai solo error e fatal
-        log.fatal("log di livello fatal");//se setti fatal, vedrai solo fatal
+        log.error("log di livello error");//se setti error, vedrai solo error
+        //log.fatal("log di livello fatal");//il FATAL per come è configurato viene visto sempre come ERROR
         return "Log presenti in: " + environment.getProperty("logging.file.name");
     }
 
@@ -252,8 +252,8 @@ public class Controller {
      * 4) Param Header su singola api (FATTO) e tutte le api tramite filtro(FATTO)
      * 5) Impostare un catturatore di eccezioni (FATTO)
      * 6) yml e lettore di properties singolo (FATTO) e multiplo (FATTO)
-     * 7) Log
-     * 8) Actuator
+     * 7) Log (FATTO)
+     * 8) Actuator (FATTO)
      * 9) Future e Retryable
      *
      * */
