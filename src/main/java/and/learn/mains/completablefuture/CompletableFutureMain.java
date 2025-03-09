@@ -2,22 +2,26 @@ package and.learn.mains.completablefuture;
 
 import java.util.*;
 import java.util.concurrent.*;
+import java.util.function.Function;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 
 public class CompletableFutureMain {
     public static void main(String[] args) {
 
         /*Creo un pool di thread di 5, in modo che non ci siano mai più di 5 thread attivi contemporaneamente.
-         * Se ne arrivano altri, aspetteranno*/
+         * Se ne arrivano altri, aspetteranno.
+         * Se non hai necessità di limitare il numero di thread, forse puoi fare a meno di crearlo,
+         * verrà creato un thread con un numero più ampio di thread possibili*/
         ExecutorService executorService = Executors.newFixedThreadPool(5);
 
-        // Simuliamo una lista di sorgenti dati
+        // Simuliamo una lista di sorgenti dati, ogni input è per un thread diverso
         List<String> dataSources = List.of("Source1", "Source2", "Source3", "Source4", "Source5");
 
-        // Da una lista di input (dataSources) si passa a una lista di CompletableFuture per quell'input (futures)
+        // Da una lista di input (dataSources) si passa a una lista di CompletableFuture
         List<CompletableFuture<String>> futures = dataSources.stream()
-                .map(source -> CompletableFuture.supplyAsync(() -> metodoReturnRisultatod(source), executorService)
+                .map(source -> CompletableFuture.supplyAsync(() -> metodoReturnRisultato(source), executorService)
                               /* lo tolgo temporaneamente per semplicità
                                // Gestione eccezioni in ogni futuro
                                .exceptionally(ex -> {
@@ -29,91 +33,131 @@ public class CompletableFutureMain {
                 .collect(Collectors.toList());
 
 
+        //Espongo 3 metodi diversi per ottenere i risultati dell'esecuzione dei thread
+        List<String> results;
+
+        /*piccola nota: se crei un CompletableFuture separato, verrà comunque eseguito insieme a tutti gli altri, anche se usi un diverso ThreadPool
+        quindi non vanno creati nuovi CompletableFuture o nuovi ExecutorService se i precedenti non sono terminati*/
+       /* ExecutorService executor = Executors.newFixedThreadPool(1);
+        CompletableFuture<String> cf = CompletableFuture.supplyAsync(() -> metodoReturnRisultato("source"), executor);
+        String result = cf.get();
+        executor.shutdown();
+        System.out.println("Risultato del singolo CompletableFuture " + result);*/
 
 
+        //results = metodo1UsingGet(futures);
+        //results = metodo2UsingJoin(futures);
+        results = metodo3UsingACombiantion(futures);
 
-
-        try {
-            /*METODO 1:
-            copiato da generali, cicla SUBITO sulla lista di completble future.
-             E' diverso dal metodo sotto più articolato, capire le differenze.
-            Fino al primo get non succede nulla.
-            Poi ciclando estrae i dati in ordine numerico da 1 a 5,
-             il primo get sul n.1 fa eseguire tutti i thread ma l'output si ferma fino al completamento del n.1 e di quelli che hanno terminato prima
-              Al secondo giro estrae i dati del n.2 che porta a termine tutti gli altri thread.*/
-           /* for(CompletableFuture<String> f : futures){
-                System.out.println("Ottenuto " + f.get());
-            }*/
-
-            /*METODO 2:
-            * più classico e preso da chat GPT*/
-
-            // Combina tutti i CompletableFuture e raccoglie i risultati
-            CompletableFuture<List<String>> allResults = CompletableFuture.allOf(futures.toArray(new CompletableFuture[0]))
-                    .thenApply(v -> futures.stream().map(CompletableFuture::join) // Recupera i risultati
-                            .collect(Collectors.toList()));
-
-
-            // Risultati finali
-
-            /*Fino a qui non è stato ancora eseguito nulla dei thread, nessuno è entrato nel metodo fetchDataFromSource
-             * Con l'istruzione get invece ci blocchiamo fino al termine di tutti i thread,
-             * i cui risultati vengono messi in result*/
-            List<String> results = allResults.get();
-            System.out.println("Risultati finali: " + results);
-        } catch (InterruptedException | ExecutionException e) {
-            System.err.println("Errore durante il completamento dei CompletableFuture: " + e.getMessage());
-        }
+        //dentro results ho la lista dei risultati ottenuti al termine del thread
+        System.out.println("Risultati finali: " + results);
 
         // Shutdown del thread pool
         executorService.shutdown();
+
+        /*****
+         * APPROCCIO SIMILE MA USANDO RUNASYNC PER ESEGUIRE METODI CHE NON RESTITUISCONO RISULTATI
+         * *******/
+        //TODO capire se posso usare RunAsync ma restituendo dei risultati.
+        provaConRunAsyncEMetodoVoid();
     }
 
-    // Metodo simulato per ottenere dati da una sorgente
-    private static String metodoReturnRisultatod(String source) {
-        Random random = new Random();
-        int sleepTime = random.nextInt(3000); // Simula tempo di elaborazione fino a 3 secondi
-        try {
-            System.out.println("Fetching data da " + source + " (ci vorranno " + sleepTime + " ms) per il thread "+Thread.currentThread().getName());
-            Thread.sleep(sleepTime);
-           /* if (random.nextBoolean()) { // Simula errore casuale
-                throw new RuntimeException("Errore di rete per " + source);
-            }*/
-        } catch (InterruptedException e) {
-            Thread.currentThread().interrupt();
-            throw new RuntimeException("Interrotto durante il fetch dei dati da " + source);
+
+    /*
+    Usa il metodo get() per ottenere i risultati, ma per definizione lancia eccezioni
+    * */
+    private static List<String> metodo1UsingGet(List<CompletableFuture<String>> futures) throws InterruptedException, ExecutionException {
+
+        List<String> results;
+
+        //uso le funzioni e avvio i thread solo quando chiamo toList, scelta migliore
+        results = futures.stream().map(f -> {
+            try {
+                return f.get();
+            } catch (InterruptedException e) {
+                throw new RuntimeException(e);
+            } catch (ExecutionException e) {
+                throw new RuntimeException(e);
+            }
+        }).toList();
+
+        //ciclo, ed avvio i thread al primo get, non è un'ottima scelta perchè poi alcuni per andare a termine richiedono i successivi get
+        /*for(CompletableFuture<String> cf : futures) {
+            results.add(cf.get());
+        }*/
+
+        return results;
+    }
+
+    /*
+    Usa il metodo join() per ottenere i risultati, che per definizione NON lancia eccezioni
+    * */
+    private static List<String> metodo2UsingJoin(List<CompletableFuture<String>> futures) {
+
+        List<String> results;
+
+        //uso le funzioni e avvio i thread solo quando chiamo toList, scelta migliore
+        Prova p = new Prova();
+        Stream<String> stream = futures.stream().map(p /*f->f.join()*/);
+        results = stream.toList();
+
+        //ciclo, ed avvio i thread al primo join, non è un'ottima scelta perchè poi alcuni per andare a termine richiedono i successivi join
+        /*results = new ArrayList<>();
+        for(CompletableFuture<String> cf : futures) {
+            results.add(cf.join());
+        }*/
+        return results;
+    }
+
+    /*Questa classe l'ho crata solo per esercitarmi sull'alternanza function/classe*/
+    public static class Prova implements Function<CompletableFuture<String>, String> {
+
+        @Override
+        public String apply(CompletableFuture<String> stringCompletableFuture) {
+            return stringCompletableFuture.join();
         }
-        System.out.println("Terminato il thread "+source+" chiamato "+Thread.currentThread().getName());
-        return "Dati da " + source;
     }
 
-    /*Stesso metodo di sopra ma senza restituire risultati*/
-    private static void metodoReturnVoid(String source) {
-        Random random = new Random();
-        int sleepTime = random.nextInt(3000); // Simula tempo di elaborazione fino a 3 secondi
-        try {
-            System.out.println("Fetching data ci vorranno " + sleepTime + " ms)");
-            Thread.sleep(sleepTime);
-           /* if (random.nextBoolean()) { // Simula errore casuale
-                throw new RuntimeException("Errore di rete per " + source);
-            }*/
-        } catch (InterruptedException e) {
-            Thread.currentThread().interrupt();
-            throw new RuntimeException("Interrotto durante il fetch dei dati");
-        }
+    /*
+    Metodo più articolato che combina tutti i CompletableFuture in input in un solo CompletableFuture per gestirlo singolarmente
 
+    * */
+    private static List<String> metodo3UsingACombiantion(List<CompletableFuture<String>> futures) {
+
+
+        //converto una lista di CompletableFuture in un array
+        CompletableFuture<String>[] futuresArray = futures.toArray(new CompletableFuture[0]);
+
+        //Creo un nuovo singolo CompletableFuture che sarà completato solo quando la lista di CompletableFuture è completata
+        //questa funzione è identica a quella che trovi nel metodo metodo2UsingJoin
+        Function<Void, List<String>> voidListFunction = v -> futures.stream().map(CompletableFuture::join).collect(Collectors.toList());
+
+        CompletableFuture<List<String>> allResults = CompletableFuture.allOf(futuresArray)
+                .thenApply(voidListFunction);
+
+        // Lancio i thread e attendo che abbiano tutti finito per restituire la lista dei risultati
+            /*Qui puoi scegliere se invocare il metodo get o join.
+            La differenza è la solita: get dichiara di lanciare eccezioni, join no.
+            Entrambi i metodi però terminano se un thread termina con un'eccezione, su questo sono uguali
+            */
+        return allResults.join();
     }
 
-    private static void prova() {
+
+    /*Capire se runAsync va in coppia con il metodo void restituito da metodoReturnVoid
+     * */
+    private static void provaConRunAsyncEMetodoVoid() {
         ExecutorService executorService = Executors.newFixedThreadPool(3); // Puoi regolare il numero di thread a seconda delle tue esigenze
 
-        CompletableFuture<String>[] futures = new CompletableFuture[3];
+        /*Quando dichiari un CompletableFuture devi dichiarare cosa contiene, ovvero l'output del metodo da eseguire in parallelo.
+        Se il metodo non restituisce un risultato, sarà un CompletableFuture<Void>*/
 
-        //Lista di possibili vincolatari associati alla proposta
-        //TOdo capire meglio come usare il runAsync.
-       /* futures[0] = CompletableFuture.runAsync(() -> metodoReturnVoid("1"), executorService);
+        //Un array di CompletableFuture<Void>
+        CompletableFuture<Void>[] futures = new CompletableFuture[3];
+
+        futures[0] = CompletableFuture.runAsync(() -> metodoReturnVoid("1"), executorService);
         futures[1] = CompletableFuture.runAsync(() -> metodoReturnVoid("2"), executorService);
-        futures[2] = CompletableFuture.runAsync(() -> metodoReturnVoid("3"), executorService);*/
+        futures[2] = CompletableFuture.runAsync(() -> metodoReturnVoid("3"), executorService);
 
         // Attendere il completamento di tutte le operazioni
         CompletableFuture<Void> allOf = CompletableFuture.allOf(futures);
@@ -121,6 +165,46 @@ public class CompletableFutureMain {
 
         // Chiudere l'ExecutorService quando non è più necessario
         executorService.shutdown();
+    }
+
+    /*
+     * METODI CHE VERRANNO ESEGUITI IN THREAD SEPARATI E PARALLELI,
+     * UNO RESTITUISCE UN RISULTATO, L'ALTRO NO
+     * */
+
+    // Metodo simulato per ottenere dati da una sorgente
+    private static String metodoReturnRisultato(String input) {
+        Random random = new Random();
+        int sleepTime = random.nextInt(3000); // Simula tempo di elaborazione fino a 3 secondi
+        try {
+            System.out.println("Elaborazione input: " + input + " (ci vorranno " + sleepTime + " ms) per il thread " + Thread.currentThread().getName());
+            Thread.sleep(sleepTime);
+           /*if (random.nextBoolean()) { // Simula errore casuale
+                throw new RuntimeException("Errore di rete per " + input);
+            }*/
+        } catch (InterruptedException e) {
+            Thread.currentThread().interrupt();
+            throw new RuntimeException("Interrotto durante il fetch dei dati da " + input);
+        }
+        System.out.println("Terminato il thread " + input + " chiamato " + Thread.currentThread().getName());
+        return "Dati da " + input;
+    }
+
+    /*Stesso metodo di sopra ma senza restituire risultati*/
+    private static void metodoReturnVoid(String input) {
+        Random random = new Random();
+        int sleepTime = random.nextInt(3000); // Simula tempo di elaborazione fino a 3 secondi
+        try {
+            System.out.println("Elaborazione input: " + input + " (ci vorranno " + sleepTime + " ms) per il thread " + Thread.currentThread().getName());
+            Thread.sleep(sleepTime);
+           /*if (random.nextBoolean()) { // Simula errore casuale
+                throw new RuntimeException("Errore di rete per " + input);
+            }*/
+        } catch (InterruptedException e) {
+            Thread.currentThread().interrupt();
+            throw new RuntimeException("Interrotto durante il fetch dei dati da " + input);
+        }
+        System.out.println("Terminato il thread " + input + " chiamato " + Thread.currentThread().getName());
     }
 
 
