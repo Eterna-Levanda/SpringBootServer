@@ -1,4 +1,4 @@
-package and.learn.mains.completablefuture;
+package and.learn.completablefuture;
 
 import java.util.Random;
 import java.util.concurrent.CompletableFuture;

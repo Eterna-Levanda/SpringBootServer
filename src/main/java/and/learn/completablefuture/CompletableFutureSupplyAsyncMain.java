@@ -1,4 +1,4 @@
-package and.learn.mains.completablefuture;
+package and.learn.completablefuture;
 
 import java.util.*;
 import java.util.concurrent.*;
@@ -25,7 +25,7 @@ import java.util.stream.Stream;
 public class CompletableFutureSupplyAsyncMain {
 
     //vale true se vuoi eseguire un metodo del thread normale, senza interruzioni con Thread.sleep poco realistici
-    private static final boolean METODO_REALISTICO = true;
+    private static final boolean METODO_REALISTICO = false;
     //vale true se vuoi che il metodo del thread possa andare in errore
     private static final boolean SIMULA_ERRORE = false;
 
@@ -36,7 +36,6 @@ public class CompletableFutureSupplyAsyncMain {
          * Se non hai necessità di limitare il numero di thread, forse puoi fare a meno di crearlo,
          * verrà creato un thread con un numero più ampio di thread possibili*/
         ExecutorService executorService = Executors.newFixedThreadPool(5);
-
         // Simuliamo una lista di sorgenti dati, ogni input è per un thread diverso
         List<String> dataSources = List.of("Source1", "Source2", "Source3", "Source4", "Source5");
 
@@ -70,10 +69,13 @@ public class CompletableFutureSupplyAsyncMain {
         executor.shutdown();
         System.out.println("Risultato del singolo CompletableFuture " + result);*/
 
-
+        /* ******
+               3 metodi per eseguire i thread, decommenta il metodo che vuoi eseguire
+        ******/
         //results = metodo1UsingGet(futures);
         //results = metodo2UsingJoin(futures);
-        results = metodo3UsingAllOf(futures);
+        //results = metodo3UsingAllOf(futures);
+        results = metodo4JoinUnicoPoiRaccoltaRisultati(futures);
 
         //dentro results ho la lista dei risultati dei singoli thread
         System.out.println("Risultati finali: " + results);
@@ -192,6 +194,30 @@ public class CompletableFutureSupplyAsyncMain {
 
         // Lancio i thread e attendo che abbiano tutti finito per restituire la lista dei risultati
         return allResults.join();
+    }
+
+    /*Questo metodo è una combinazione delle tecniche precedenti,
+    * perchè prima si crea un unico CompletableFuture che serve a lanciare tutti i thread col metodo join,
+    * poi sui singoli CompletableFuture in input invoca ancora la join per estrarre i risultai dati thread già terminati.
+    *
+    * Invece nei metodi 1 e 2, senza il CompletableFuture unico, era eseguendo il join sui singoli CompletableFuture
+    * non ancora avviati/terminati che si lanciavano i thread uno ad uno, qui invece li si lancia tutti assieme.
+    * */
+    private static List<String> metodo4JoinUnicoPoiRaccoltaRisultati(List<CompletableFuture<String>> futures) {
+        //converto una lista (di CompletableFuture) in un array
+        CompletableFuture<String>[] futuresArray = futures.toArray(new CompletableFuture[0]);
+
+        //in questo modo chiamo il join sull'oggetto contenitore, in modo da avviare tutti i thread
+        CompletableFuture.allOf(futuresArray).join();
+
+        /* Raccolgo tutte le response una ad una dai CompletableFuture in input chiamando join.
+           E' importante sapere che in questo caso, ovvero con i thread già terminati,
+           quando eseguo join vado solo ad estrarre il risultato */
+        List<String> results = new ArrayList<>();
+        for(CompletableFuture<String> cf : futures) {
+            results.add(cf.join());
+        }
+        return results;
     }
 
     /*  Metodo che verrà eseguito in un thrad parallelo di durata casuale.

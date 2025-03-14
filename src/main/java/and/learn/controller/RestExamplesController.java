@@ -19,7 +19,7 @@ import java.util.Optional;
 @Log4j2
 @RestController("nomeBeanCrudController")
 @RequestMapping("/Controller")
-public class Controller {
+public class RestExamplesController {
 
 
     /*
