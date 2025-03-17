@@ -157,7 +157,7 @@ public class CompletableFutureSupplyAsyncMain {
 
     /*
     Metodo più articolato che combina tutti i CompletableFuture in input in un solo CompletableFuture per gestirlo singolarmente.
-    Non si capisce quale possa essere il vantaggio rispetto ai precedenti.
+    Non si capisce quale possa essere il vantaggio rispetto ai precedenti. Non mi piace perchè troppo articolato.
     * */
     private static List<String> metodo3UsingAllOf(List<CompletableFuture<String>> futures) {
 
@@ -202,12 +202,20 @@ public class CompletableFutureSupplyAsyncMain {
     *
     * Invece nei metodi 1 e 2, senza il CompletableFuture unico, era eseguendo il join sui singoli CompletableFuture
     * non ancora avviati/terminati che si lanciavano i thread uno ad uno, qui invece li si lancia tutti assieme.
+    *
+    * Qualcosa di simile a quanto avviene in questo metodo è descritto nella guida ufficiale, ossia:
+    * 1) creo i singoli CompletableFuture
+    * 2) li metto in un array
+    * 3) lancio CompletableFuture.allOf(futuresArray).join()
+    * 4) estraggo i risultati dai singoli CompletableFuture
     * */
     private static List<String> metodo4JoinUnicoPoiRaccoltaRisultati(List<CompletableFuture<String>> futures) {
         //converto una lista (di CompletableFuture) in un array
         CompletableFuture<String>[] futuresArray = futures.toArray(new CompletableFuture[0]);
 
-        //in questo modo chiamo il join sull'oggetto contenitore, in modo da avviare tutti i thread
+        /* In questo modo chiamo il join sull'oggetto contenitore,
+        in modo da avviare tutti i thread e rimanere fermo finchè non termino
+         */
         CompletableFuture.allOf(futuresArray).join();
 
         /* Raccolgo tutte le response una ad una dai CompletableFuture in input chiamando join.
