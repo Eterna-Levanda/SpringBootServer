@@ -6,22 +6,9 @@ import java.util.function.Function;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-
-/**Concetti imparati:
- *
- * 0) CompletableFuture è una classe parametrizzata, ovvero devi definire nelle parentesi angolari non cosa contiene,
- * ma il tipo di output che il thread che lancia conterrà.
- *
- * 1) I CompletableFuture servono a lanciare N thread e aspettare che terminino tutti prima di proseguire,
- * mantenendone il controllo sull'esito e sul valore di ritorno,
- * non a lanciare un thread separato di cui non si sa come termina perdendone completamente il controllo.
- *
- * 2) join e get terminano quando terminano tutti i thread (se richiamato sul CompletableFuture contenitore)
- * 3) join e get si differenziano solo perchè join non dichiara di lanciare eccezioni, get sì.
- * 4) Solo join e get lanciano i thread
- *
- * 5) Per metodi di thread con valore di ritorno si usa supplyAsync per creare un CompletableFuture,
- * se il metodo non ha un valore di ritorno si usa runAsync che si rifà ai Runnable di Tread classico*/
+/**
+ * Classe main con 4 metodi possibili per lanciare i CompletableFuture sfruttando 4 tecniche diverse.
+ * Su 2 metodi (metodo1UsingGet, metodo1UsingJoin) ci sono anche 2 sotto metodi, per una maggiore comprensione del funzionamento.*/
 public class CompletableFutureSupplyAsyncMain {
 
     //vale true se vuoi eseguire un metodo del thread normale, senza interruzioni con Thread.sleep poco realistici
@@ -44,14 +31,13 @@ public class CompletableFutureSupplyAsyncMain {
            metodo che si usa per i thread che resituiscono metodi */
         List<CompletableFuture<String>> futures = dataSources.stream()
                 .map(source -> CompletableFuture.supplyAsync(() -> metodoReturnResult(source), executorService)
-                              /* lo tolgo temporaneamente per semplicità di lettura
-                               // Gestione eccezioni in ogni futuro
-                               .exceptionally(ex -> {
+                               // Gestione eccezioni in ogni future
+                               /*.exceptionally(ex -> {
                                    System.err.println("Errore durante il fetch dei dati da " + source + ": " + ex.getMessage());
                                    return "Errore per " + source; // Valore di fallback
-                               })
+                               })*/
                                // Timeout per ogni operazione
-                               .completeOnTimeout("Timeout per " + source, 2, TimeUnit.SECONDS)*/)
+                               .completeOnTimeout("Timeout per " + source, 2, TimeUnit.SECONDS))
                 .collect(Collectors.toList());
 
 
@@ -70,7 +56,7 @@ public class CompletableFutureSupplyAsyncMain {
         System.out.println("Risultato del singolo CompletableFuture " + result);*/
 
         /* ******
-               3 metodi per eseguire i thread, decommenta il metodo che vuoi eseguire
+               3 METODI DIVERSI PER LANCIARE I THREAD, DECOMMENTA QUELLO CHE VUOI PROVARE
         ******/
         //results = metodo1UsingGet(futures);
         //results = metodo2UsingJoin(futures);
@@ -94,7 +80,7 @@ public class CompletableFutureSupplyAsyncMain {
 
         /* I thread verranno lanciati solo quando chiamo toList,
            è la scelta migliore rispetto a invocare il metodo get() direttamente sui singoli CompletableFuture
-           come mostrato  successivamente in questo metodo
+           come mostrato successivamente in questo metodo
         */
         results = futures.stream().map(f -> {
             try {
@@ -146,7 +132,7 @@ public class CompletableFutureSupplyAsyncMain {
         return results;
     }
 
-    /*Questa classe l'ho crata solo per esercitarmi sull'alternanza function/classe*/
+    /*Questa classe l'ho creata solo per esercitarmi sull'alternanza function/classe*/
     public static class FunctionCompletableFuture implements Function<CompletableFuture<String>, String> {
 
         @Override
@@ -228,7 +214,7 @@ public class CompletableFutureSupplyAsyncMain {
         return results;
     }
 
-    /*  Metodo che verrà eseguito in un thrad parallelo di durata casuale.
+    /*  Metodo che verrà eseguito in un thread parallelo di durata casuale.
      * Lavorando sulle costanti si possono ottenere comportamenti diversi
      * */
     private static String metodoReturnResult(String input) {

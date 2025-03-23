@@ -20,18 +20,19 @@ public class SpecificController {
     private CompletableFutureAsyncService completableFutureAsyncService;
 
     /**
-     * Tecnica che utilizza l'annotation @Async su un metodo,
+     * Tecnica che utilizza l'annotation @Async sul metodo che verrà eseguito su thread separato,
      * come spiegato nella guida ufficiale
-     * https://spring.io/guides/gs/async-method
+     * <a href="https://spring.io/guides/gs/async-method">...</a>
      *
-     * @param numOfThreadToExecute = numero di thread da eseguire
-       @param eseguiAllOf vale true se deve lanciare i thread tramite
-       CompletableFuture.allOf(listOfCompletableFuture).join();
-       come indicato nella guida ufficiale,
-       altrimenti lancia i thread uno ad uno.
-     *
-       http://localhost:8080/SpecificController/completableFuture?numOfThreadToExecute=4&eseguiAllOf=true
-     * */
+     @param numOfThreadToExecute = numero di thread da eseguire
+     @param eseguiAllOf vale true se deve lanciare i thread tramite
+     CompletableFuture.allOf(listOfCompletableFuture).join();
+     come indicato nella guida ufficiale,
+     altrimenti lancia i thread singolarmente uno a uno.
+
+     Per provarlo:
+     http://localhost:8080/SpecificController/completableFuture?numOfThreadToExecute=4&eseguiAllOf=true
+      * */
     @GetMapping("/completableFuture")
     public String completableFuture(@RequestParam Integer numOfThreadToExecute, @RequestParam(defaultValue = "true") boolean eseguiAllOf) {
         return completableFutureAsyncService.executeAsyncThreads(numOfThreadToExecute, eseguiAllOf);

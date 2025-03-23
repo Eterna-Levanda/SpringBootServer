@@ -1,4 +1,4 @@
-package and.learn.config;
+package and.learn.config.completablefuture;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -7,12 +7,14 @@ import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
 
 import java.util.concurrent.Executor;
 
-/* Classe usata per rendere i metodi asincroni tramite l'uso dell'annotarion:
+/* Classe usata per rendere i metodi asincroni tramite l'uso dell'annotation:
 * org.springframework.scheduling.annotation.Async;*/
 @EnableAsync
 @Configuration
 public class AsyncMethodConfiguration {
 
+    /**L'Executor che viene qui creato e restituito,
+     * viene utilizzato dalla classe AsyncMethodService*/
     @Bean("executorAsync")
     public Executor taskExecutor() {
         ThreadPoolTaskExecutor executor = new ThreadPoolTaskExecutor();

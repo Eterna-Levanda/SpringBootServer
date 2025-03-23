@@ -11,13 +11,14 @@ import java.util.concurrent.CompletableFuture;
 public class AsyncMethodService {
 
 
-    /* Se vuoi togliere l'asincronia dei thread e usarne uno solo,
-     * basta commentare l'annotation.
+    /* Se vuoi togliere l'asincronia dei thread e
+        usarne uno solo per testare la differenza in termini di tempo,
+     * basta commentare l'annotation @Async.
      *
      * Il parametro dentro l'annotation serve a specificare il nome del bean
      * che rappresenta il ThreadPoolTaskExecutor,
      * in modo che si possano usare e configurare diversi ThreadPoolTaskExecutor,
-     * a seconda delle diverse esigenze.
+     * a seconda delle diverse esigenze dei singoli CompletableFuture.
      *
      * Importante: affinchè il metodo sia davvero eseguito in modo asincrono,
      * occorrono 2 cose:
@@ -31,7 +32,7 @@ public class AsyncMethodService {
         log.info("Avviato il metodo asincrono con input " + input + " sul thread " + nomeThread);
         String sToReturn = input + " aggiunto in modo asincrono";
         try {
-            Thread.sleep(2000);
+            Thread.sleep(1000);
         } catch (InterruptedException e) {
             throw new RuntimeException(e);
         }

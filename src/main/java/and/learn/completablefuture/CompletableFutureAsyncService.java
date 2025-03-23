@@ -12,7 +12,9 @@ public class CompletableFutureAsyncService {
     @Autowired
     private AsyncMethodService asyncMethodService;
 
-    /**@param eseguiAllOf Se posto a true avvierà i thread con un'unica esecuzione, tramite:
+    /**
+     * @param numOfThreadToExecute indica quanti thread vuoi eseguire
+     * @param eseguiAllOf Se posto a true avvierà i thread con un'unica esecuzione, tramite:
      CompletableFuture.allOf(listOfCompletableFuture).join();
      per poi estrarne i risultati già pronti ciclando singolarmente sui singoli CompletableFuture,
      come indicato nella guida ufficiale,
