@@ -1,6 +1,6 @@
 package and.learn.controller;
 
-import and.learn.config.PropertyReader;
+import and.learn.config.property.PropertyReader;
 import and.learn.request.plain.Esterno;
 import and.learn.request.propsrinominate.EsternoPropsRinominate;
 import jakarta.validation.Valid;
