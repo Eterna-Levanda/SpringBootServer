@@ -6,8 +6,12 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.web.servlet.ServletComponentScan;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.annotation.Bean;
+import org.springframework.retry.annotation.EnableRetry;
 
-@ServletComponentScan  // Necessario per far rilevare @WebFilter
+/* Necessario per far rilevare @WebFilter*/
+@ServletComponentScan
+//Abilita la funzionalità di Retry usata da vari service
+@EnableRetry
 @SpringBootApplication
 public class SpringBootServerApplication {
     public static void main(String[] args) {
@@ -22,6 +26,7 @@ public class SpringBootServerApplication {
         }*/
     }
 
+    //I metodi annotati con @Bean o stanno nella classe SpringBootApplication o in una annotata con @Configuration, come AsyncMethodConfiguration
     @Bean
     public CommandLineRunner commandLineRunner(ApplicationContext ctx) {
         return args -> {
