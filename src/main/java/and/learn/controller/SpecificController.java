@@ -1,5 +1,6 @@
 package and.learn.controller;
 
+import and.learn.cache.CacheService;
 import and.learn.retryable.RetryTemplateService;
 import and.learn.retryable.RetryableDoppioMetodoDueRecoverService;
 import and.learn.retryable.RetryableDoppioMetodoUnRecoverService;
@@ -34,6 +35,9 @@ public class SpecificController {
 
     @Autowired
     RetryTemplateService retryableConTemplateService;
+
+    @Autowired
+    CacheService cacheService;
 
     /**
      * Tecnica che utilizza l'annotation @Async sul metodo che verrà eseguito su thread separato,
@@ -104,6 +108,17 @@ public class SpecificController {
 
         //dopo il fallimento dell'ultimo tentativo, viene eseguita una funzione di recover
         return retryableConTemplateService.retryableMethodConRecover();
-
     }
+
+    /**
+     * Metodo che restituisce la stringa presa in input in maiuscolo usando una cache
+     *  Per provarlo:
+     *      http://localhost:8080/SpecificController/toUpperCaseWithCache?input=a
+     * */
+    @GetMapping("/toUpperCaseWithCache")
+    public String toUpperCaseWithCache(@RequestParam String input){
+        return cacheService.metodoConCache(input);
+    }
+
+
 }
