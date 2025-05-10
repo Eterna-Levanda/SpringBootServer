@@ -13,6 +13,7 @@ import org.springframework.retry.annotation.EnableRetry;
 @ServletComponentScan
 //Abilita la funzionalità di Retry usata da vari service
 @EnableRetry
+//Abilita la funzionalità di cache con EhCache
 @EnableCaching
 @SpringBootApplication
 public class SpringBootServerApplication {

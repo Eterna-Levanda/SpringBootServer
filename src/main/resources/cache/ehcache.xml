@@ -1,0 +1,33 @@
+<config
+        xmlns:xsi='http://www.w3.org/2001/XMLSchema-instance'
+        xmlns='http://www.ehcache.org/v3'
+        xsi:schemaLocation="
+            http://www.ehcache.org/v3
+            http://www.ehcache.org/schema/ehcache-core-3.7.xsd">
+
+
+    <!-- Definisco un template (opzionale) che le singole cache possono eventualmente ereditare -->
+    <cache-template name="default">
+        <expiry>
+            <!-- Tempo di vita di tutte le cache che ereditano questo template -->
+            <ttl unit="seconds">30</ttl>
+        </expiry>
+    </cache-template>
+
+    <!-- Configurazione della cacheSpecific che eredita la configurazione del template di defaul scritto sopra -->
+    <cache alias="cacheSpecific" uses-template="default">
+        <resources>
+            <!-- Numero di entity salvate nella cache, quindi massimo 2 elementi-->
+            <heap unit="entries">2</heap>
+        </resources>
+    </cache>
+
+    <!-- Altre cache che potrei definire con differenti parametri rispetto a cacheSpecific
+    <cache alias="anotherCache">
+        <expiry>
+            <ttl unit="seconds">100</ttl>
+        </expiry>
+    </cache>
+    -->
+
+</config>

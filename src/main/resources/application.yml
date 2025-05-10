@@ -39,5 +39,5 @@ spring:
   cache:
     type: jcache
     jcache:
-      config: classpath:ehcache.xml
+      config: classpath:cache/ehcache.xml # Specifica dove si trova il file di conf da leggere
 
