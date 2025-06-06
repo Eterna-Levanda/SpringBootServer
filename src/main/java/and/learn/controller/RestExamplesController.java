@@ -243,18 +243,4 @@ public class RestExamplesController {
         //log.fatal("log di livello fatal");//il FATAL per come è configurato viene visto sempre come ERROR
         return "Log presenti in: " + environment.getProperty("logging.file.name");
     }
-
-
-    /*TODO
-     * 1) www-url-encoded (FATTO)
-     * 2) Cambiare il nome delle variabili dal json alla variabile java (FATTO)
-     * 3) Settare lo status code (FATTO)
-     * 4) Param Header su singola api (FATTO) e tutte le api tramite filtro(FATTO)
-     * 5) Impostare un catturatore di eccezioni (FATTO)
-     * 6) yml e lettore di properties singolo (FATTO) e multiplo (FATTO)
-     * 7) Log (FATTO)
-     * 8) Actuator (FATTO)
-     * 9) Future e Retryable
-     *
-     * */
 }

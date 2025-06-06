@@ -33,3 +33,11 @@ management:
   health:
     defaults:
       enabled: false  # Disabilita tutti gli indicatori di default che offre Spring, se metti true compare qualche info in più
+
+#Cache con ehcache
+spring:
+  cache:
+    type: jcache
+    jcache:
+      config: classpath:cache/ehcache.xml # Specifica dove si trova il file di conf da leggere
+

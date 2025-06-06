@@ -1,5 +1,6 @@
 package and.learn.controller;
 
+import and.learn.cache.CacheService;
 import and.learn.retryable.RetryTemplateService;
 import and.learn.retryable.RetryableDoppioMetodoDueRecoverService;
 import and.learn.retryable.RetryableDoppioMetodoUnRecoverService;
@@ -35,6 +36,9 @@ public class SpecificController {
     @Autowired
     RetryTemplateService retryableConTemplateService;
 
+    @Autowired
+    CacheService cacheService;
+
     /**
      * Tecnica che utilizza l'annotation @Async sul metodo che verrà eseguito su thread separato,
      * come spiegato nella guida ufficiale
@@ -53,6 +57,8 @@ public class SpecificController {
     public String completableFuture(@RequestParam Integer numOfThreadToExecute, @RequestParam(defaultValue = "true") boolean eseguiAllOf) {
         return completableFutureAsyncService.executeAsyncThreads(numOfThreadToExecute, eseguiAllOf);
     }
+
+    //API DI RETRY
 
     /**Serve a testare il funzionamento dell'annotation @Retryable su un metodo,
      * in modo da eseguirlo più volte in caso di fallimento.
@@ -104,6 +110,41 @@ public class SpecificController {
 
         //dopo il fallimento dell'ultimo tentativo, viene eseguita una funzione di recover
         return retryableConTemplateService.retryableMethodConRecover();
-
     }
+
+    //API PER GESTIONE CACHE CON EHCACHE
+
+    /**
+     * Metodo che restituisce la stringa presa in input in maiuscolo usando una cache
+     *  Per provarlo:
+     *      http://localhost:8080/SpecificController/toUpperCaseWithCache?key=a
+     * */
+    @GetMapping("/toUpperCaseWithCache")
+    public String toUpperCaseWithCache(@RequestParam String key){
+        return cacheService.metodoConCache(key);
+    }
+
+    /**
+     * Metodo che svuota la cache
+     * Per provarlo:
+     *      http://localhost:8080/SpecificController/evictCache
+     * */
+    @GetMapping("/evictCache")
+    public String evictCache(){
+        cacheService.evictCache();
+        return "Cache svuotata";
+    }
+
+    /**
+     * Aggiorna un singolo valore della cache
+     * Per provarlo:
+     *      http://localhost:8080/SpecificController/updateValueInCache?key=a&value=nuovoValore
+     * */
+    @GetMapping("/updateValueInCache")
+    public String updateValueInCache(@RequestParam String key, @RequestParam String value){
+        cacheService.updateValueInCache(key, value);
+        return "Cache aggiornata: il valore di "+key+" ora e' "+value;
+    }
+
+
 }
