@@ -40,4 +40,9 @@ spring:
     type: jcache
     jcache:
       config: classpath:cache/ehcache.xml # Specifica dove si trova il file di conf da leggere
+#Disabilitare i batch all'avvio
+  batch:
+    job:
+      enabled: false
+
 
