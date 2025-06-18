@@ -27,9 +27,11 @@ import java.util.Arrays;
 public class BasicBatchConfig {
 
     //CONFIGURAZIONE DEL JOB
-    @Bean(/*Il nome del bean sarà uguale al nome del metodo,
+    @Bean(/*Il nome del bean Job sarà uguale al nome del metodo,
     se lo vuoi diverso devi specificarlo dentro l'annotation*/)
-    public Job basicJob(JobRepository jobRepository, Step basicStep) {
+    public Job basicJob(JobRepository jobRepository, Step basicStep
+    /*Il nome della variabile basicStep è uguale al nome del bean,
+    altrimenti dovresti usare un @Qualifier per specificare quale Bran di tipo Step vuoi utilizzare*/) {
         return new JobBuilder("Nome Job", jobRepository)
                 .incrementer(new RunIdIncrementer())
                 .start(basicStep)
