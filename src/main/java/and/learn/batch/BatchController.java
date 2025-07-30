@@ -6,6 +6,7 @@ import org.springframework.batch.core.JobParameters;
 import org.springframework.batch.core.JobParametersBuilder;
 import org.springframework.batch.core.launch.JobLauncher;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
@@ -24,6 +25,10 @@ public class BatchController {
 
     @Autowired
     private Job complexJob;
+
+    @Autowired
+    @Qualifier("batchWithDecider")
+    private Job deciderJob;
 
     /**Lancia un batch base: 1 job e 1 step.
      * Per provarlo:
@@ -52,4 +57,19 @@ public class BatchController {
         JobExecution execution = jobLauncher.run(complexJob, params);
         return "Job lanciato con status: " + execution.getStatus();
     }
+
+    /**Lancia un batch avanzato: 1 job e 2 step, con un decider.
+     * Per provarlo:
+     * http://localhost:8080/batch/deciderBatch
+     * */
+    @GetMapping("/deciderBatch")
+    public String deciderBatch() throws Exception {
+        JobParameters params = new JobParametersBuilder()
+                .addLong("timestamp", System.currentTimeMillis()) // per rendere il job univoco
+                .toJobParameters();
+        JobExecution execution = jobLauncher.run(deciderJob, params);
+        return "Job avanzato lanciato con status: " + execution.getStatus();
+    }
+
+
 }
