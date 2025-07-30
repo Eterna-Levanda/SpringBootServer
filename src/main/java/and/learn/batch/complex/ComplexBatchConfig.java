@@ -183,9 +183,9 @@ public class ComplexBatchConfig {
     @Bean
     /*
     I bean annotati con @StepScope vengono inizializzati solo quando lo step associato viene eseguito
-    e ne esiste un'istanza per ogni esecuzione dello step, quindi non si tratta di Bean Singleton come gli altri!
+    e ne esiste un'istanza diversa per ogni esecuzione dello step, quindi non si tratta di Bean Singleton come gli altri!
     In questo modo non si rischia la sovrascrittura di parametri dovuto ad esecuzioni multiple dello stesso step.
-    Si potrebbe usare anche @JobScope non dovrebbe cambiare nulla, solo la durata di vita del Bean
+    Si potrebbe usare anche @JobScope (in modo che viva per tutto il tempo del job) dovrebbe cambiare solo la durata di vita del Bean
     */
     @StepScope
     public ItemProcessor<Integer, Integer> processorJob1Step2() {

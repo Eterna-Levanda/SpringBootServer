@@ -43,22 +43,22 @@ public class BasicBatchConfig {
     public Step basicStep(JobRepository jobRepository, PlatformTransactionManager transactionManager) {
         return new StepBuilder("Nome Step", jobRepository)
                 .<Integer, Integer>chunk(2, transactionManager)
-                .reader(reader())
-                .processor(processor())
-                .writer(writer())
+                .reader(createReader())
+                .processor(createProcessor())
+                .writer(createWriter())
                 .build();
     }
 
     //CONFIGURAZIONE DELLE 3 FASI
     @Bean
-    public ListItemReader<Integer> reader() {
+    public ListItemReader<Integer> createReader() {
         return new ListItemReader<>(Arrays.asList(1, 2, 3, 4, 5));
     }
 
     /**Puoi scegliere di creare un'istanza di ItemProcessor tramite functional interface,
      * oppure creando e istanzando una classe che implementi ItemProcessor*/
     @Bean
-    public ItemProcessor<Integer, Integer> processor() {
+    public ItemProcessor<Integer, Integer> createProcessor() {
 
         //Metodo con lambda
         /*return n -> {
@@ -74,7 +74,7 @@ public class BasicBatchConfig {
      * oppure creando e istanzando una classe che implementi ItemWriter.
      */
     @Bean
-    public ItemWriter<Integer> writer() {
+    public ItemWriter<Integer> createWriter() {
 
         //Metodo con lambda
         //return chunk -> log.debug("Writing chunk: " + chunk.getItems());
