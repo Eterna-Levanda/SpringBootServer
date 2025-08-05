@@ -34,7 +34,7 @@ public class RetryableService {
      *          multiplier: fattore di moltiplicazione del tempo di delay dopo ogni tentativo
      *          maxDelay: limite massimo del delay moltiplicato, per non esagerare con l'attesa
      * */
-    @Retryable(value = IllegalArgumentException.class, maxAttempts = MAX_ATTEMPTS, backoff = @Backoff(delay = 2000, multiplier = 2, maxDelay = 10000))
+    @Retryable(retryFor = IllegalArgumentException.class, maxAttempts = MAX_ATTEMPTS, backoff = @Backoff(delay = 2000, multiplier = 2, maxDelay = 10000))
     public String retryableMethod(int successoAllNesimoTentativo) {
 
         // Ottiene il contesto del retry

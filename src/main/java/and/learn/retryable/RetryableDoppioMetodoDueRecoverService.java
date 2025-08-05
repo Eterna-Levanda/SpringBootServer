@@ -20,14 +20,14 @@ public class RetryableDoppioMetodoDueRecoverService {
 
     static final int MAX_ATTEMPTS = 3;
 
-    @Retryable(value = IllegalArgumentException.class, maxAttempts = MAX_ATTEMPTS, backoff = @Backoff(delay = 2000))
+    @Retryable(retryFor = IllegalArgumentException.class, maxAttempts = MAX_ATTEMPTS, backoff = @Backoff(delay = 2000))
     public String retryableMethod1(int input) {
         int attempt = RetrySynchronizationManager.getContext().getRetryCount() + 1;
         log.info("⏳ Tentativo n." + attempt);
         throw new IllegalArgumentException();
     }
 
-    @Retryable(value = IllegalArgumentException.class, maxAttempts = MAX_ATTEMPTS, backoff = @Backoff(delay = 2000))
+    @Retryable(retryFor = IllegalArgumentException.class, maxAttempts = MAX_ATTEMPTS, backoff = @Backoff(delay = 2000))
     public String retryableMethod2(String input) {
         int attempt = RetrySynchronizationManager.getContext().getRetryCount() + 1;
         log.info("⏳ Tentativo n." + attempt);
