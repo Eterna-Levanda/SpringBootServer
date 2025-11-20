@@ -30,7 +30,7 @@ public class DeciderBatchConfig {
 
 
     @Bean("batchWithDecider")
-    public Job createJobOfDeciderBatch(JobRepository jobRepository, JobExecutionDecider decider, Step stepIniziale, Step stepPari, Step stepDispari){
+    Job createJobOfDeciderBatch(JobRepository jobRepository, JobExecutionDecider decider, Step stepIniziale, Step stepPari, Step stepDispari){
         return new JobBuilder("advancedJob", jobRepository)
                 //primo step del Job
                 .start(stepIniziale)
@@ -65,7 +65,7 @@ public class DeciderBatchConfig {
     }
 
     @Bean("decider")
-    public JobExecutionDecider getDecider() {
+    JobExecutionDecider getDecider() {
 
         /* Stessa implementazione ma con Lambda
         return (jobExecution, stepExecution) -> {
