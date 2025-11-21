@@ -22,6 +22,11 @@ public class CacheService {
      * Usa la cache definita in ehcache.xml.
      * La cache contiene massimo 2 elementi, ognuno conservato per 30 secondi.
      * Se arriva un terzo elemento da inserire in cache, il più veccho viene rimosso (evict)
+     *
+     * Volendo raffinare la cache e avendo in input un oggetto complesso,
+     * potrei specificare quale campo dell'oggetto viene usato come campo chiave della cache
+     * aggiungendo questo nella definizione dell'enum:
+     * key = "#input.nome_campo"
      */
     @Cacheable("cacheSpecific")
     public String metodoConCache(String input) {
