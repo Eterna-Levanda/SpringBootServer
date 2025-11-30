@@ -10,38 +10,56 @@ import java.io.*;
 import java.lang.reflect.Type;
 import java.net.URL;
 import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.List;
 
-public class XmlJsonParser {
-    
-    private XmlJsonParser(){}
+/**
+ * Classe di utilità che offre funzioni di:
+ * <ul>
+ * <li>lettura di file come stringa</li>
+ * <li>creazione oggetto da file name contenente un json</li>
+ * <li>creazione lista di oggetti da file name contenente un json</li>
+ * </ul>
+ */
+public class JsonFileParser {
 
-    public static String readFile(String fileName) throws IOException {
-        URL url = Thread.currentThread().getContextClassLoader().getResource(fileName);
-        FileInputStream fis = new FileInputStream(url.getFile());
-        try (BufferedReader br = new BufferedReader(new InputStreamReader(fis, StandardCharsets.UTF_8))) {
-            StringBuilder sb = new StringBuilder();
-            String line;
-            while ((line = br.readLine()) != null) {
-                sb.append(line);
-                sb.append('\n');
-            }
+    private JsonFileParser() {}
 
-            /*Tolgo l'ultimo carattere \n dalla stringa in modo da avere
-            una stringa perfettamente uguale al file letto,
-            carattere a capo compreso.
-             */
-            if(sb.isEmpty()) {
-                sb.deleteCharAt(sb.length() - 1);
-            }
-
-            return sb.toString();
-        }
+    public static void main(String[] a) throws IOException {
+        System.out.println(JsonFileParser.readFileAsString("txt/File.txt"));
     }
 
+    /**
+     * Restituisce una stringa con il contenuto del file indicato nel filePath.
+     * Il metodo usa il class loader per trovare il file,
+     * perciò il filePath deve essere passato a partire dalla cartella resources
+     * */
+    public static String readFileAsString(String filePath) throws IOException {
+
+        URL url = Thread.currentThread().getContextClassLoader().getResource(filePath);
+        FileInputStream fis = new FileInputStream(url.getFile());
+        try (BufferedReader reader = new BufferedReader(new InputStreamReader(fis, StandardCharsets.UTF_8))) {
+            StringBuilder sb = new StringBuilder();
+            String line;
+            while ((line = reader.readLine()) != null) {
+                sb.append(line).append(System.lineSeparator());
+            }
+            //elimino l'ultimo line sepatator aggiunto all'ultimo ciclo
+            if (!sb.isEmpty()) {
+                sb.deleteCharAt(sb.length() - 1);
+            }
+            return sb.toString();
+        }
+
+    }
+
+    /**
+     * Legge un file JSON dalle risorse del classpath in UTF-8 e lo converte in un oggetto del tipo specificato.
+     */
     public static <T> T readJsonResourceUTF8(final String resourceName, final Class<T> clazz) throws IOException {
         Gson gson = new GsonBuilder()
                 .setDateFormat("yyyy-MM-dd")
@@ -58,6 +76,9 @@ public class XmlJsonParser {
         }
     }
 
+    /**
+     * Legge un file JSON dalle risorse del classpath in UTF-8 e lo converte in una lista di oggetti del tipo specificato.
+     */
     public static <T> List<T> readJsonResourceUTF8ForList(final String resourceName, final Class<T> clazz) throws IOException {
         Gson gson = new GsonBuilder()
                 .setDateFormat("yyyy-MM-dd")
@@ -75,6 +96,7 @@ public class XmlJsonParser {
         }
     }
 
+    //Classi interne per gestione date
     protected static class LocalDateAdapter extends TypeAdapter<LocalDate> {
         @Override
         public void write(JsonWriter jsonWriter, LocalDate date) throws IOException {

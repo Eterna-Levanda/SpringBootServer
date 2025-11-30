@@ -108,7 +108,7 @@
             <scope>runtime</scope>
         </dependency>
 
-<!--         Per metodi di utilità lettura json e xml -->
+        <!-- Per metodi di utilità lettura json -->
         <dependency>
             <groupId>com.google.code.gson</groupId>
             <artifactId>gson</artifactId>
