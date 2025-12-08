@@ -27,6 +27,9 @@ public class BatchController {
     private Job complexJob;
 
     @Autowired
+    private Job errorManagerJob;
+
+    @Autowired
     @Qualifier("batchWithDecider")
     private Job deciderJob;
 
@@ -51,7 +54,8 @@ public class BatchController {
         //Parametri in input al Job
         JobParameters params = new JobParametersBuilder()
                 .addString("nomeUtente", "andrea")
-                .addLong("timestamp", System.currentTimeMillis()) // per rendere il job univoco
+                // per rendere il job univoco e poterlo riavviare ogni volta
+                .addLong("timestamp", System.currentTimeMillis())
                 .toJobParameters();
 
         JobExecution execution = jobLauncher.run(complexJob, params);
@@ -65,10 +69,25 @@ public class BatchController {
     @GetMapping("/deciderBatch")
     public String deciderBatch() throws Exception {
         JobParameters params = new JobParametersBuilder()
-                .addLong("timestamp", System.currentTimeMillis()) // per rendere il job univoco
+                // per rendere il job univoco e poterlo riavviare ogni volta
+                .addLong("timestamp", System.currentTimeMillis())
                 .toJobParameters();
         JobExecution execution = jobLauncher.run(deciderJob, params);
         return "Job avanzato lanciato con status: " + execution.getStatus();
+    }
+
+    /**Lancia un batch con gestione degli errori
+     * Per provarlo:
+     * http://localhost:8080/batch/errorManagerJob
+     * */
+    @GetMapping("/errorManagerJob")
+    public String errorManagerJob() throws Exception {
+        JobParameters params = new JobParametersBuilder()
+                // per rendere il job univoco e poterlo riavviare ogni volta
+                .addLong("timestamp", System.currentTimeMillis())
+                .toJobParameters();
+        JobExecution execution = jobLauncher.run(errorManagerJob, new JobParameters());
+        return "Job lanciato con status: " + execution.getStatus();
     }
 
 
