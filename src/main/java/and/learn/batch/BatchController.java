@@ -86,7 +86,7 @@ public class BatchController {
                 // per rendere il job univoco e poterlo riavviare ogni volta
                 .addLong("timestamp", System.currentTimeMillis())
                 .toJobParameters();
-        JobExecution execution = jobLauncher.run(errorManagerJob, new JobParameters());
+        JobExecution execution = jobLauncher.run(errorManagerJob, params);
         return "Job lanciato con status: " + execution.getStatus();
     }
 
