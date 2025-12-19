@@ -30,7 +30,7 @@ public class DeciderBatchConfig {
 
 
     @Bean("batchWithDecider")
-    Job createJobOfDeciderBatch(JobRepository jobRepository, JobExecutionDecider decider, Step stepIniziale, Step stepPari, Step stepDispari){
+    public Job createJobOfDeciderBatch(JobRepository jobRepository, JobExecutionDecider decider, Step stepIniziale, Step stepPari, Step stepDispari){
         return new JobBuilder("advancedJob", jobRepository)
                 //primo step del Job
                 .start(stepIniziale)
@@ -44,7 +44,7 @@ public class DeciderBatchConfig {
     }
 
     @Bean("stepIniziale")
-    Step stepIniziale(JobRepository jobRepository, PlatformTransactionManager transactionManager) {
+    public Step stepIniziale(JobRepository jobRepository, PlatformTransactionManager transactionManager) {
         return new StepBuilder("stepIniziale", jobRepository)
 
                 //per semplicità uso un tasklet, ma si potrebbero usare le 3 fasi: reader, processor, writer
@@ -65,7 +65,7 @@ public class DeciderBatchConfig {
     }
 
     @Bean("decider")
-    JobExecutionDecider getDecider() {
+    public JobExecutionDecider getDecider() {
 
         /* Stessa implementazione ma con Lambda
         return (jobExecution, stepExecution) -> {
@@ -96,7 +96,7 @@ public class DeciderBatchConfig {
     }
     
     @Bean("stepPari")
-    Step creaStepPari(JobRepository jobRepository, PlatformTransactionManager transactionManager) {
+    public Step creaStepPari(JobRepository jobRepository, PlatformTransactionManager transactionManager) {
         return new StepBuilder("stepPari", jobRepository)
                 .tasklet((contribution, chunkContext) -> {
                     log.info("Esecuzione dello step pari");
@@ -106,7 +106,7 @@ public class DeciderBatchConfig {
     }
 
     @Bean("stepDispari")
-    Step creaStepDispari(JobRepository jobRepository, PlatformTransactionManager transactionManager) {
+    public Step creaStepDispari(JobRepository jobRepository, PlatformTransactionManager transactionManager) {
         return new StepBuilder("stepDispari", jobRepository)
                 .tasklet((contribution, chunkContext) -> {
                     log.info("Esecuzione dello step dispari");
