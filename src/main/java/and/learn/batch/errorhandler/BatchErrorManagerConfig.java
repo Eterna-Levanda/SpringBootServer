@@ -25,9 +25,9 @@ import java.util.Arrays;
 @Configuration
 public class BatchErrorManagerConfig {
 
-    private final IllegalArgumentException EXCEPTION_TO_SKIP = new IllegalArgumentException();
-    private final IllegalAccessException EXCEPTION_TO_RETRY = new IllegalAccessException();
-    private final Exception EXCEPTION_NOT_HANDLED = new Exception();
+    private final IllegalArgumentException EXCEPTION_TO_SKIP = new IllegalArgumentException("Eccezione definita per lo skip dell'elemento");
+    private final IllegalAccessException EXCEPTION_TO_RETRY = new IllegalAccessException("Eccezione definita per il retry dell'elemento");
+    private final ArrayIndexOutOfBoundsException EXCEPTION_TO_NO_SKIP = new ArrayIndexOutOfBoundsException("Eccezione definita per NON SKIPPARE l'elemento e interrompere il batch");
 
     //CONFIGURAZIONE DEL JOB
     @Bean()
@@ -50,11 +50,16 @@ public class BatchErrorManagerConfig {
                 .skip(EXCEPTION_TO_SKIP.getClass())//per saltare le eccezioni specificate
                 .skipLimit(2)//numero massimo di elementi che si possono skippare, al successivo il batch si interrompe
 
+                /*Con questa configurazione viene definito che lo skip dell'elemento che causa un'eccezione
+                 viene fatto per tutte le Exception tranne quella specificata nel metodo noSkip.
+                 Scegli tu se usare skip() oppure skip() + noSkip().
+                .skip(Exception.class)
+                .noSkip(EXCEPTION_TO_NO_SKIP.getClass())*/
+
                 //politiche di retry per riprovare l'intero chunk quando un elemento lancia eccezione di retry
                 .retry(EXCEPTION_TO_RETRY.getClass()) //per riprovare l'intero chunk in caso di eccezioni specifiche
                 .retryLimit(2) //se retryLimit = N, un elemento può lanciare eccezione di retry ed essere RI-processato solo N-1 volte, all'N-esima volta che lancia eccezione di retry viene scartato o causare l'interruzione del batch.
-                .skip(EXCEPTION_TO_RETRY.getClass()) //in questo modo viene definito cosa deve fare Spring nel caso in cui un elemento lanci un'eccezione di retry (ovvero definita nel metodo retry) per un numero di volte pari a retryLimit, ovvero scartare l'elemento (skip). Se così non fosse allora il batch verrebbe interrotto
-                //.noRollback(EXCEPTION_TO_RETRY.getClass())
+                .skip(EXCEPTION_TO_RETRY.getClass()) //in questo modo viene definito cosa deve fare Spring nel caso in cui un elemento lanci un'eccezione di retry (ovvero definita nel metodo retry) per un numero di volte pari a retryLimit, ovvero scartare l'elemento (skip). Se così non fosse allora il batch verrebbe interrotto dopo il recovery del chunk sugli elementi andati a buon fine.
 
                 .reader(createReaderPhase())
                 .processor(createProcessorPhase())
@@ -81,15 +86,14 @@ public class BatchErrorManagerConfig {
            } else if (n == 3) {
                 log.debug("Viene lanciata un'eccezione per tentare un retry dell'elemento");
                 throw EXCEPTION_TO_RETRY;
-            } /*else if(n == 4) {
-                log.debug("Viene lanciata un'eccezione non gestita dallo step");
-                throw EXCEPTION_NOT_HANDLED;
-            }*/
+           } else if (n == 4) {
+               log.debug("Viene lanciata un'eccezione che NON fa skippare l'elemento e interrompe il batch dopo il recovery del chunk sugli elementi andati a buon fine");
+               throw EXCEPTION_TO_NO_SKIP;
+           }
 
             return n;
         };
     }
-
 
     /**
      * Puoi scegliere di creare un'istanza di ItemWriter tramite functional interface,
@@ -102,8 +106,5 @@ public class BatchErrorManagerConfig {
         return chunk -> {
             log.debug("Chunk items: " + chunk.getItems());
         };
-
     }
-
-
 }
