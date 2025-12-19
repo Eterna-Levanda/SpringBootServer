@@ -1,13 +1,15 @@
 package and.learn.batch.errorhandler;
 
 import lombok.extern.log4j.Log4j2;
-import org.springframework.batch.core.Job;
-import org.springframework.batch.core.Step;
+import org.springframework.batch.core.*;
 import org.springframework.batch.core.configuration.annotation.StepScope;
 import org.springframework.batch.core.job.builder.JobBuilder;
 import org.springframework.batch.core.launch.support.RunIdIncrementer;
 import org.springframework.batch.core.repository.JobRepository;
+import org.springframework.batch.core.scope.context.ChunkContext;
+import org.springframework.batch.core.scope.context.StepSynchronizationManager;
 import org.springframework.batch.core.step.builder.StepBuilder;
+import org.springframework.batch.item.Chunk;
 import org.springframework.batch.item.ItemProcessor;
 import org.springframework.batch.item.ItemWriter;
 import org.springframework.batch.item.support.ListItemReader;
@@ -28,6 +30,7 @@ public class BatchErrorManagerConfig {
     private final IllegalArgumentException EXCEPTION_TO_SKIP = new IllegalArgumentException("Eccezione definita per lo skip dell'elemento");
     private final IllegalAccessException EXCEPTION_TO_RETRY = new IllegalAccessException("Eccezione definita per il retry dell'elemento");
     private final ArrayIndexOutOfBoundsException EXCEPTION_TO_NO_SKIP = new ArrayIndexOutOfBoundsException("Eccezione definita per NON SKIPPARE l'elemento e interrompere il batch");
+    private static final String NOME_FASE_ERRORE = "Fase fallita";
 
     //CONFIGURAZIONE DEL JOB
     @Bean()
@@ -64,6 +67,45 @@ public class BatchErrorManagerConfig {
                 .reader(createReaderPhase())
                 .processor(createProcessorPhase())
                 .writer(createWriterPhase())
+
+                .listener(new ChunkListener() {
+
+                    /*Questo metodo viene invocato a seguito di tutte le eccezioni lanciate durante l'esecuzione del batch,
+                    compresa l'eccezione finale che termina il job (es: RetryExceededException e SkipLimitExceededException).
+                     */
+                    @Override
+                    public void afterChunkError(ChunkContext context) {
+
+                        //recupero il parametro passato a runtime che indica la fase in cui si è verificato l'errore
+                        Object nomeFaseErrore = context.getStepContext().getStepExecution().getExecutionContext().get(NOME_FASE_ERRORE);
+                        log.debug("Eccezione lanciata che ha terminato il chunk: {}, durante la fase {}", context.getAttribute("sb_rollback_exception"), nomeFaseErrore);
+                    }
+                })
+                .listener(new ItemProcessListener<>() {
+
+                    @Override
+                    public void onProcessError(Integer item, Exception e) {
+                        log.debug("Eccezione durante la fase di process. Item in errore: {}, eccezione: {}", item, e.toString());
+                        setParametroNomeFaseErrore("Process");
+                    }
+                })
+                .listener(new ItemReadListener<>() {
+                    @Override
+                    public void onReadError(Exception ex) {
+                        log.debug("Eccezione durante la fase di lettura: {}", ex.toString());
+                        setParametroNomeFaseErrore("Read");
+                    }
+                })
+                .listener(new ItemWriteListener<>() {
+
+                    @Override
+                    public void onWriteError(Exception exception, Chunk<? extends Integer> items) {
+                        log.debug("Eccezione durante la fase di scrittura: {}", exception.toString());
+                        if (items != null && !items.isEmpty()) {
+                            setParametroNomeFaseErrore("Write");
+                        }
+                    }
+                })
                 .build();
     }
 
@@ -75,6 +117,7 @@ public class BatchErrorManagerConfig {
     }
 
     @Bean
+    @StepScope
     public ItemProcessor<Integer, Integer> createProcessorPhase() {
 
         return n -> {
@@ -100,11 +143,18 @@ public class BatchErrorManagerConfig {
      * oppure creando e istanzando una classe che implementi ItemWriter.
      */
     @Bean
+    @StepScope
     public ItemWriter<Integer> createWriterPhase() {
 
-        //Metodo con lambda
         return chunk -> {
             log.debug("Chunk items: " + chunk.getItems());
         };
+    }
+
+    /* Salva un parametro a runtime sul nome della fase che ha dato errore, per poi leggerla nel ChunkListener*/
+    private void setParametroNomeFaseErrore(String nomeFase) {
+        if (StepSynchronizationManager.getContext() != null && StepSynchronizationManager.getContext().getStepExecution() != null) {
+            StepSynchronizationManager.getContext().getStepExecution().getExecutionContext().put(NOME_FASE_ERRORE, nomeFase);
+        }
     }
 }
