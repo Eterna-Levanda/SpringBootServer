@@ -16,7 +16,7 @@ import org.springframework.transaction.PlatformTransactionManager;
 
 import java.util.Arrays;
 
-/*
+/**
     Batch con un solo job e un solo step.
     Nessun parametro in input
     Lavora con Chunk.

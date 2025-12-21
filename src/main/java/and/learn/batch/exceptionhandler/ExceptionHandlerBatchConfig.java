@@ -1,4 +1,4 @@
-package and.learn.batch.errorhandler;
+package and.learn.batch.exceptionhandler;
 
 import lombok.extern.log4j.Log4j2;
 import org.springframework.batch.core.*;
@@ -19,13 +19,15 @@ import org.springframework.transaction.PlatformTransactionManager;
 
 import java.util.Arrays;
 
-/*
-    Batch con un solo job e un solo step
-    con gestione degli errori
+/**
+    Batch con funzionalità di:
+        1) con gestione delle eccezioni
+        2) listener
+        3) passaggio di parametri interno dl batch (vedi getExecutionContext)
 */
 @Log4j2
 @Configuration
-public class BatchErrorManagerConfig {
+public class ExceptionHandlerBatchConfig {
 
     private final IllegalArgumentException EXCEPTION_TO_SKIP = new IllegalArgumentException("Eccezione definita per lo skip dell'elemento");
     private final IllegalAccessException EXCEPTION_TO_RETRY = new IllegalAccessException("Eccezione definita per il retry dell'elemento");
@@ -34,7 +36,7 @@ public class BatchErrorManagerConfig {
 
     //CONFIGURAZIONE DEL JOB
     @Bean()
-    public Job errorManagerJob(JobRepository jobRepository, Step errorManagerStep) {
+    public Job exceptionHandlerJob(JobRepository jobRepository, Step errorManagerStep) {
         return new JobBuilder("JobErrorManager", jobRepository)
                 .incrementer(new RunIdIncrementer())
                 .start(errorManagerStep)
@@ -55,12 +57,12 @@ public class BatchErrorManagerConfig {
 
                 /*Con questa configurazione viene definito che lo skip dell'elemento che causa un'eccezione
                  viene fatto per tutte le Exception tranne quella specificata nel metodo noSkip.
-                 Scegli tu se usare skip() oppure skip() + noSkip().
+                 Scegli tu se usare skip(EccezioneSpecifica) oppure skip(EccezioneGenerica) + noSkip(EccezioneSpecifica).
                 .skip(Exception.class)
                 .noSkip(EXCEPTION_TO_NO_SKIP.getClass())*/
 
-                //politiche di retry per riprovare l'intero chunk quando un elemento lancia eccezione di retry
-                .retry(EXCEPTION_TO_RETRY.getClass()) //per riprovare l'intero chunk in caso di eccezioni specifiche
+                //politiche di retry per riprovare un elemento che lancia eccezione di retry
+                .retry(EXCEPTION_TO_RETRY.getClass()) //per riprovare l'elemento che lancia questa eccezione
                 .retryLimit(2) //se retryLimit = N, un elemento può lanciare eccezione di retry ed essere RI-processato solo N-1 volte, all'N-esima volta che lancia eccezione di retry viene scartato o causare l'interruzione del batch.
                 .skip(EXCEPTION_TO_RETRY.getClass()) //in questo modo viene definito cosa deve fare Spring nel caso in cui un elemento lanci un'eccezione di retry (ovvero definita nel metodo retry) per un numero di volte pari a retryLimit, ovvero scartare l'elemento (skip). Se così non fosse allora il batch verrebbe interrotto dopo il recovery del chunk sugli elementi andati a buon fine.
 
@@ -75,7 +77,6 @@ public class BatchErrorManagerConfig {
                      */
                     @Override
                     public void afterChunkError(ChunkContext context) {
-
                         //recupero il parametro passato a runtime che indica la fase in cui si è verificato l'errore
                         Object nomeFaseErrore = context.getStepContext().getStepExecution().getExecutionContext().get(NOME_FASE_ERRORE);
                         log.debug("Eccezione lanciata che ha terminato il chunk: {}, durante la fase {}", context.getAttribute("sb_rollback_exception"), nomeFaseErrore);
@@ -113,7 +114,7 @@ public class BatchErrorManagerConfig {
     @Bean
     @StepScope
     public ListItemReader<Integer> createReaderPhase() {
-        return new ListItemReader<>(Arrays.asList(1, 2, 3, 4));
+        return new ListItemReader<>(Arrays.asList(0, 1, 2, 3, 4));
     }
 
     @Bean

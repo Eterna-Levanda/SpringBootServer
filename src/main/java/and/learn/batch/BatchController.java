@@ -9,6 +9,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 @RestController
@@ -24,10 +25,10 @@ public class BatchController {
     private Job basicJob;
 
     @Autowired
-    private Job complexJob;
+    private Job multiJob;
 
     @Autowired
-    private Job errorManagerJob;
+    private Job exceptionHandlerJob;
 
     @Autowired
     @Qualifier("batchWithDecider")
@@ -46,19 +47,19 @@ public class BatchController {
 
     /**Lancia un batch complesso: 2 job e 3 step in tutto.
      * Per provarlo:
-     * http://localhost:8080/batch/startComplexBatch
+     * http://localhost:8080/batch/startMultiJobBatch?nomeUtente=andrea
      * */
-    @GetMapping("/startComplexBatch")
-    public String startComplexBatch() throws Exception {
+    @GetMapping("/startMultiJobBatch")
+    public String startMultiJobBatch(@RequestParam("nomeUtente")String nomeUtente) throws Exception {
 
         //Parametri in input al Job
         JobParameters params = new JobParametersBuilder()
-                .addString("nomeUtente", "andrea")
+                .addString("nomeUtente", nomeUtente)
                 // per rendere il job univoco e poterlo riavviare ogni volta
                 .addLong("timestamp", System.currentTimeMillis())
                 .toJobParameters();
 
-        JobExecution execution = jobLauncher.run(complexJob, params);
+        JobExecution execution = jobLauncher.run(multiJob, params);
         return "Job lanciato con status: " + execution.getStatus();
     }
 
@@ -76,17 +77,17 @@ public class BatchController {
         return "Job avanzato lanciato con status: " + execution.getStatus();
     }
 
-    /**Lancia un batch con gestione degli errori
+    /**Lancia un batch con gestione delle eccezioni. Configurato per terminare con un'eccezione.
      * Per provarlo:
-     * http://localhost:8080/batch/errorManagerJob
+     * http://localhost:8080/batch/exceptionHandlerJob
      * */
-    @GetMapping("/errorManagerJob")
-    public String errorManagerJob() throws Exception {
+    @GetMapping("/exceptionHandlerJob")
+    public String exceptionHandlerJob() throws Exception {
         JobParameters params = new JobParametersBuilder()
                 // per rendere il job univoco e poterlo riavviare ogni volta
                 .addLong("timestamp", System.currentTimeMillis())
                 .toJobParameters();
-        JobExecution execution = jobLauncher.run(errorManagerJob, params);
+        JobExecution execution = jobLauncher.run(exceptionHandlerJob, params);
         return "Job lanciato con status: " + execution.getStatus();
     }
 

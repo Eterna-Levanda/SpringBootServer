@@ -1,4 +1,4 @@
-package and.learn.batch.advanced;
+package and.learn.batch.decider;
 
 import lombok.extern.log4j.Log4j2;
 import org.springframework.batch.core.Job;
@@ -20,6 +20,9 @@ import java.util.Random;
 /**
  * Batch configurato in modo che ci sia un job iniziale che genera un numero casuale e,
  * a seconda che questo sia pari o dispari, il batch esegue uno step anzichè un altro.
+ *
+ * Il batch fa uso di parametri passati internamente al batch stesso,
+ * non esternamente in fase di avvio (vedi getExecutionContext)
  *
  * Notare che dove viene usato StepContext e ExecutionContext,
  * si potrebbe usare convertire usando invece i rispettivi omologhi JobContext e ExecutionContext.

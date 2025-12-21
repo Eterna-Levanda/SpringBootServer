@@ -1,4 +1,4 @@
-package and.learn.batch.complex;
+package and.learn.batch.multi;
 
 import lombok.extern.log4j.Log4j2;
 import org.springframework.batch.core.Job;
@@ -22,9 +22,15 @@ import org.springframework.transaction.PlatformTransactionManager;
 
 import java.util.Arrays;
 
-/*
-    Batch complesso dove al termine del primo Job (composto da 2 Step) si vuole eseguire un altro Job (composto da un solo step).
+/**
+    Batch con job annidati e Step sequenziali dove al termine del primo Job (composto da 2 Step) si vuole eseguire un altro Job (composto da un solo step).
     Per concatenare 2 job è necessario però che il secondo Job venga wrappato in uno Step che di fatto sarà il terzo step del job 1.
+
+    Il batch lavora con:
+        1) Job e step multipli (annidati e sequenziali)
+        2) parametri in input passati dall'esterno del batch in fase di avvio del batch
+        3) listener
+
     Dunque l'archiettura 'concettaule' del batch è la seguente:
     Archietettura del batch definito in questa classe:
     Job1
@@ -59,15 +65,11 @@ import java.util.Arrays;
                     Processor
                     Writer
 
-    Parametri in input => Sono descritti nel file online ma non li ho provati
     Lavora con Chunk.
-    TODO Altre configurazioni aggiuntive.
-
-
-*/
+ */
 @Log4j2
 @Configuration
-public class ComplexBatchConfig {
+public class MultiJobStepBatchConfig {
 
     //CONFIGURAZIONE DEL JOB 1, QUELLO DI PARTENZA
 
@@ -75,7 +77,7 @@ public class ComplexBatchConfig {
     * I nomi dei parametri Step hanno il nome del bean definito dai metodi sotto che restituiscono Step,
     * se vuoi nomi diversi devi usare l'annotation @Qualifier
     * */
-    @Bean("complexJob")
+    @Bean("multiJob")
     public Job getJob1(JobRepository jobRepository, Step step1Job1, Step step2Job1, Step job2Wrapper) {
         return new JobBuilder("Job1", jobRepository)
                 .incrementer(new RunIdIncrementer())
