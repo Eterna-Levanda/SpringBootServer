@@ -17,7 +17,7 @@ logging:
     max-history: 5       # Numero massimo di file storici
   pattern:
     file:    "%d{yyyy-MM-dd HH:mm:ss} %-5level %logger{50}.%M - Line:%L - %msg%n"
-    console: "%d{yyyy-MM-dd HH:mm:ss} %-5level %logger{50}.%M - Line:%L - %msg%n"
+    console: "%d{yyyy-MM-dd HH:mm:ss} %clr(%-5level) %logger{50}.%M - Line:%L - %clr(%msg){cyan}%n"
 
 #Actuator
 management:
@@ -40,6 +40,9 @@ spring:
     type: jcache
     jcache:
       config: classpath:cache/ehcache.xml # Specifica dove si trova il file di conf da leggere
+  output:
+    ansi:
+      enabled: always # abiliazione dei colori
 #Disabilitare i batch all'avvio per non farli avviare in automatico
   batch:
     job:
