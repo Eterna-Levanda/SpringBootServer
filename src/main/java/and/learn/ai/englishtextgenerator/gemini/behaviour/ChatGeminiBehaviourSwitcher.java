@@ -1,9 +1,9 @@
-package and.learn.ai.englishtextgenerator.behaviour;
+package and.learn.ai.englishtextgenerator.gemini.behaviour;
 
-import and.learn.ai.englishtextgenerator.behaviour.implementation.ChatGeminiInLineFilesGoogleApi;
-import and.learn.ai.englishtextgenerator.behaviour.implementation.ChatGeminiInLineFilesRest;
-import and.learn.ai.englishtextgenerator.behaviour.implementation.ChatGeminiUploadFilesGoogleApi;
-import and.learn.ai.englishtextgenerator.behaviour.implementation.ChatGeminiUploadFilesRest;
+import and.learn.ai.englishtextgenerator.gemini.behaviour.implementation.ChatGeminiInLineFilesGoogleApi;
+import and.learn.ai.englishtextgenerator.gemini.behaviour.implementation.ChatGeminiInLineFilesRest;
+import and.learn.ai.englishtextgenerator.gemini.behaviour.implementation.ChatGeminiUploadFilesGoogleApi;
+import and.learn.ai.englishtextgenerator.gemini.behaviour.implementation.ChatGeminiUploadFilesRest;
 
 public class ChatGeminiBehaviourSwitcher {
 

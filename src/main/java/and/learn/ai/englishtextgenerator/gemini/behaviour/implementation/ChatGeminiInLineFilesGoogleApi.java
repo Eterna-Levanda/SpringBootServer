@@ -1,6 +1,6 @@
-package and.learn.ai.englishtextgenerator.behaviour.implementation;
+package and.learn.ai.englishtextgenerator.gemini.behaviour.implementation;
 
-import and.learn.ai.englishtextgenerator.behaviour.ChatGeminiGoogleApiAbstract;
+import and.learn.ai.englishtextgenerator.gemini.behaviour.ChatGeminiGoogleApiAbstract;
 import com.google.genai.types.Content;
 import com.google.genai.types.GenerateContentResponse;
 import com.google.genai.types.Part;
@@ -35,7 +35,7 @@ public class ChatGeminiInLineFilesGoogleApi extends ChatGeminiGoogleApiAbstract 
         response = client.models.generateContent(
                 GEMINI_VERSION,
                 promptParts.toString(),
-                null
+                config
         );
 
         return response.text();
@@ -67,7 +67,7 @@ public class ChatGeminiInLineFilesGoogleApi extends ChatGeminiGoogleApiAbstract 
             GenerateContentResponse response = client.models.generateContent(
                     GEMINI_VERSION,
                     chatHistory,
-                    null
+                    config
             );
 
             String modelResponseText = response.text();

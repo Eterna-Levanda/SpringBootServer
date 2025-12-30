@@ -1,4 +1,4 @@
-package and.learn.ai.englishtextgenerator.behaviour;
+package and.learn.ai.englishtextgenerator.gemini.behaviour;
 
 //Elenca le implementazioni possibili verso Gemini per inviare un messaggio con allegati
 public enum ChatGeminiBehaviour {

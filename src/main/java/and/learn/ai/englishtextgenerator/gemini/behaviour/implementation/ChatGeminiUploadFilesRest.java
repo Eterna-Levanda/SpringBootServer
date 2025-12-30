@@ -1,6 +1,6 @@
-package and.learn.ai.englishtextgenerator.behaviour.implementation;
+package and.learn.ai.englishtextgenerator.gemini.behaviour.implementation;
 
-import and.learn.ai.englishtextgenerator.behaviour.ChatGeminiInterface;
+import and.learn.ai.englishtextgenerator.gemini.behaviour.ChatGeminiInterface;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 
@@ -56,7 +56,7 @@ public class ChatGeminiUploadFilesRest implements ChatGeminiInterface {
                         }
                       ],
                       "generationConfig": {
-                          "temperature": 0.5
+                          "temperature":"""+TEMPERATURE+"""
                         }
                     }
                     """.formatted(

@@ -1,7 +1,8 @@
-package and.learn.ai.englishtextgenerator.behaviour;
+package and.learn.ai.englishtextgenerator.gemini.behaviour;
 
 import com.google.genai.Client;
 import com.google.genai.types.Content;
+import com.google.genai.types.GenerateContentConfig;
 import com.google.genai.types.GenerateContentResponse;
 import com.google.genai.types.Part;
 
@@ -9,17 +10,20 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
-import static and.learn.ai.englishtextgenerator.EnglishTextGeneratorMain.API_KEY;
-import static and.learn.ai.englishtextgenerator.EnglishTextGeneratorMain.GEMINI_VERSION;
+import static and.learn.ai.englishtextgenerator.EnglishTextGeneratorMain.*;
 
 public abstract class ChatGeminiGoogleApiAbstract implements ChatGeminiInterface {
 
     protected final Client client;
     protected List<Content> chatHistory;
+    protected GenerateContentConfig config;
 
     protected ChatGeminiGoogleApiAbstract() {
         client = Client.builder().apiKey(API_KEY).build();
         chatHistory = new ArrayList<>();
+        config = GenerateContentConfig.builder()
+                .temperature(TEMPERATURE)
+                .build();
     }
 
     @Override
@@ -45,7 +49,7 @@ public abstract class ChatGeminiGoogleApiAbstract implements ChatGeminiInterface
             GenerateContentResponse response = client.models.generateContent(
                     GEMINI_VERSION,
                     chatHistory,
-                    null
+                    config
             );
 
             // 4. Estraiamo il testo della risposta
@@ -76,7 +80,7 @@ public abstract class ChatGeminiGoogleApiAbstract implements ChatGeminiInterface
         GenerateContentResponse response = client.models.generateContent(
                 GEMINI_VERSION,
                 promptText,
-                null
+                config
         );
 
         // Restituiamo il testo generato dal modello

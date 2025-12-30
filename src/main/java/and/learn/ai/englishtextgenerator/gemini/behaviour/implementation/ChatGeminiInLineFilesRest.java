@@ -1,6 +1,6 @@
-package and.learn.ai.englishtextgenerator.behaviour.implementation;
+package and.learn.ai.englishtextgenerator.gemini.behaviour.implementation;
 
-import and.learn.ai.englishtextgenerator.behaviour.ChatGeminiInterface;
+import and.learn.ai.englishtextgenerator.gemini.behaviour.ChatGeminiInterface;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;

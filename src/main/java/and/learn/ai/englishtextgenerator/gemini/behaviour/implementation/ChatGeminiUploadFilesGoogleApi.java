@@ -1,6 +1,6 @@
-package and.learn.ai.englishtextgenerator.behaviour.implementation;
+package and.learn.ai.englishtextgenerator.gemini.behaviour.implementation;
 
-import and.learn.ai.englishtextgenerator.behaviour.ChatGeminiGoogleApiAbstract;
+import and.learn.ai.englishtextgenerator.gemini.behaviour.ChatGeminiGoogleApiAbstract;
 import com.google.genai.types.*;
 import org.jspecify.annotations.NonNull;
 

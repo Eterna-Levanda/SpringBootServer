@@ -1,4 +1,4 @@
-package and.learn.ai.englishtextgenerator.behaviour;
+package and.learn.ai.englishtextgenerator.gemini.behaviour;
 
 import java.io.IOException;
 
