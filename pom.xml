@@ -20,6 +20,19 @@
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     </properties>
 
+    <dependencyManagement>
+        <dependencies>
+            <!-- Google Cloud Libraries BOM: Gestisce versioni di Gemini, Auth e Gax -->
+            <dependency>
+                <groupId>com.google.cloud</groupId>
+                <artifactId>libraries-bom</artifactId>
+                <version>26.53.0</version>
+                <type>pom</type>
+                <scope>import</scope>
+            </dependency>
+        </dependencies>
+    </dependencyManagement>
+
     <dependencies>
         <!-- Dipendenza principale di Spring Boot -->
         <dependency>
@@ -114,7 +127,51 @@
             <artifactId>gson</artifactId>
             <version>2.13.1</version>
         </dependency>
+        <dependency>
+            <groupId>com.fasterxml.jackson.core</groupId>
+            <artifactId>jackson-databind</artifactId>
+            <version>2.15.2</version>
+        </dependency>
 
+        <!-- Artificial Intelligence -->
+
+        <!-- 1. Per chiamare direttamente le api di Google -->
+        <dependency>
+            <groupId>com.google.genai</groupId>
+            <artifactId>google-genai</artifactId>
+            <version>1.32.0</version>
+        </dependency>
+
+        <!-- 2. Accesso a Google Drive -->
+        <dependency>
+             <groupId>com.google.apis</groupId>
+             <artifactId>google-api-services-drive</artifactId>
+             <version>v3-rev20241027-2.0.0</version>
+         </dependency>
+
+         <!-- 3. Supporto Autenticazione (Service Account e OAuth2) -->
+        <dependency>
+            <groupId>com.google.auth</groupId>
+            <artifactId>google-auth-library-oauth2-http</artifactId>
+        </dependency>
+
+        <!-- 4. SDK Google Api -->
+        <dependency>
+            <groupId>com.google.api-client</groupId>
+            <artifactId>google-api-client</artifactId>
+        </dependency>
+
+        <!-- 5. Trasporto GSON per le librerie Google (Parsing JSON) -->
+        <dependency>
+            <groupId>com.google.http-client</groupId>
+            <artifactId>google-http-client-gson</artifactId>
+        </dependency>
+
+        <!-- 6. Protocol Buffers (Richiesto dall'SDK di Gemini) -->
+        <dependency>
+            <groupId>com.google.protobuf</groupId>
+            <artifactId>protobuf-java</artifactId>
+        </dependency>
     </dependencies>
 
     <build>
