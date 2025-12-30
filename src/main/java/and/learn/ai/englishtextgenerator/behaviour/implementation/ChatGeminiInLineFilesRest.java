@@ -1,5 +1,6 @@
-package and.learn.ai.englishtextgenerator.behaviour;
+package and.learn.ai.englishtextgenerator.behaviour.implementation;
 
+import and.learn.ai.englishtextgenerator.behaviour.ChatGeminiInterface;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
@@ -15,11 +16,10 @@ import static and.learn.ai.englishtextgenerator.EnglishTextGeneratorMain.*;
 
 public class ChatGeminiInLineFilesRest implements ChatGeminiInterface {
 
-
     /**
      * Chiama Gemini senza effettuare upload dei file
      */
-    public String chiamaGemini(byte[] pdf1, byte[] pdf2, String promptText) throws IOException {
+    public String sendMessageWithFiles(String promptText, byte[] pdf1, byte[] pdf2) throws IOException {
 
         HttpClient client = HttpClient.newHttpClient();
         ObjectMapper mapper = new ObjectMapper();
@@ -68,6 +68,21 @@ public class ChatGeminiInLineFilesRest implements ChatGeminiInterface {
         } catch (InterruptedException e) {
             throw new IOException("Chiamata verso Gemini in fase di upload file. Errore: " + e);
         }
+    }
+
+    @Override
+    public String sendMessageWithFilesUsingMemory(String promptText, byte[] file1, byte[] file2) throws IOException {
+        throw new RuntimeException("Metodo non implementato");
+    }
+
+    @Override
+    public String sendMessageUsingMemory(String promptText) throws IOException {
+        throw new RuntimeException("Metodo non implementato");
+    }
+
+    @Override
+    public String sendMessage(String promptText) throws IOException {
+        throw new RuntimeException("Metodo non implementato");
     }
 
     private void addInlineData(ArrayNode parts, byte[] data) {

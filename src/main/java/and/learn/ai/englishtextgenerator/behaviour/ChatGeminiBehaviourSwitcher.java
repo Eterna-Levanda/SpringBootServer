@@ -1,5 +1,10 @@
 package and.learn.ai.englishtextgenerator.behaviour;
 
+import and.learn.ai.englishtextgenerator.behaviour.implementation.ChatGeminiInLineFilesGoogleApi;
+import and.learn.ai.englishtextgenerator.behaviour.implementation.ChatGeminiInLineFilesRest;
+import and.learn.ai.englishtextgenerator.behaviour.implementation.ChatGeminiUploadFilesGoogleApi;
+import and.learn.ai.englishtextgenerator.behaviour.implementation.ChatGeminiUploadFilesRest;
+
 public class ChatGeminiBehaviourSwitcher {
 
     public static ChatGeminiInterface getInstance(ChatGeminiBehaviour behaviour) {

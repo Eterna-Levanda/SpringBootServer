@@ -1,5 +1,6 @@
-package and.learn.ai.englishtextgenerator.behaviour;
+package and.learn.ai.englishtextgenerator.behaviour.implementation;
 
+import and.learn.ai.englishtextgenerator.behaviour.ChatGeminiInterface;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 
@@ -17,7 +18,7 @@ public class ChatGeminiUploadFilesRest implements ChatGeminiInterface {
      * Questo metodo effetua upload
      */
     @Override
-    public String chiamaGemini(byte[] file1, byte[] file2, String promptText) throws IOException {
+    public String sendMessageWithFiles(String promptText, byte[] file1, byte[] file2) throws IOException {
 
         HttpClient client = HttpClient.newHttpClient();
         String fileUri1;
@@ -90,6 +91,19 @@ public class ChatGeminiUploadFilesRest implements ChatGeminiInterface {
             throw new IOException("Chiamata verso Gemini in fase di upload file. Errore: " + e);
         }
     }
+
+    @Override
+    public String sendMessageWithFilesUsingMemory(String promptText, byte[] file1, byte[] file2) throws IOException {
+        throw new RuntimeException("Metodo non implementato");
+    }
+
+    @Override
+    public String sendMessageUsingMemory(String promptText) throws IOException {
+        throw new RuntimeException("Metodo non implementato");    }
+
+    @Override
+    public String sendMessage(String promptText) throws IOException {
+        throw new RuntimeException("Metodo non implementato");    }
 
     private static String uploadPdf(HttpClient client, byte[] pdfBytes)
             throws IOException, InterruptedException {

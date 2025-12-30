@@ -40,7 +40,7 @@ public class EnglishTextGeneratorMain {
     public static final String APPLICATION_PDF = "application/pdf";
 
     static {
-        //inizializzazione delle costanti
+        //inizializzazione delle costanti tramite file di properties
         Properties props = new Properties();
         try (InputStream is = Files.newInputStream(Path.of("src/main/resources/ai/config/englishtextgenerator/secret.properties"))) {
             props.load(is);
@@ -78,7 +78,7 @@ public class EnglishTextGeneratorMain {
         long start = System.currentTimeMillis();
         // Chiamata a Gemini
         String risposta = ChatGeminiBehaviourSwitcher.getInstance(ChatGeminiBehaviour.UPLOAD_FILES_API)
-                .chiamaGemini(contentSinonimi, contentErroriFrequenti, prompt);
+                .sendMessageWithFiles(prompt, contentSinonimi, contentErroriFrequenti);
         long end = System.currentTimeMillis();
         //System.out.println("Tempo impegato in millisecondi: " + (end - start));
         System.out.println(risposta);
