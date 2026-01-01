@@ -1,0 +1,40 @@
+package and.learn.ai.englishtextgenerator.googleservice;
+
+import com.google.api.services.docs.v1.DocsScopes;
+import com.google.api.services.drive.DriveScopes;
+import com.google.auth.oauth2.GoogleCredentials;
+import lombok.Getter;
+
+import java.io.FileInputStream;
+import java.io.IOException;
+import java.security.GeneralSecurityException;
+import java.util.Arrays;
+import java.util.List;
+
+@Getter
+public class GoogleServicesFactory {
+
+    public static final String SERVICE_ACCOUNT_FILE = "src/main/resources/ai/config/englishtextgenerator/service-account.json";
+
+    private final DriveManager driveManager;
+    private final DocsManager docsManager;
+
+    public GoogleServicesFactory() throws IOException, GeneralSecurityException {
+
+        // 1. Definiamo gli scope necessari per tutta l'applicazione.
+        // Se devono essere utilizzati altri servizi, aggiungerli alla lista
+        List<String> ALL_SCOPES = Arrays.asList(
+                DriveScopes.DRIVE_READONLY,  // Permessi per Drive, per accedere solo ai file condivisi con l'app
+                DocsScopes.DOCUMENTS    // Permessi per Docs
+        );
+
+        // 2. Carichiamo le credenziali una volta sola
+        GoogleCredentials credentials = GoogleCredentials.fromStream(new FileInputStream(SERVICE_ACCOUNT_FILE))
+                .createScoped(ALL_SCOPES);
+
+        // 3. Istanzio i service
+        driveManager = new DriveManager(credentials);
+        docsManager = new DocsManager(credentials);
+
+    }
+}

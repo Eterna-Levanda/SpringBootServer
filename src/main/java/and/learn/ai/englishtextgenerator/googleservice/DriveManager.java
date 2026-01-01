@@ -1,38 +1,31 @@
-package and.learn.ai.englishtextgenerator.drive;
+package and.learn.ai.englishtextgenerator.googleservice;
 
 import com.google.api.client.googleapis.javanet.GoogleNetHttpTransport;
 import com.google.api.client.json.gson.GsonFactory;
 import com.google.api.services.drive.Drive;
-import com.google.api.services.drive.DriveScopes;
 import com.google.auth.http.HttpCredentialsAdapter;
 import com.google.auth.oauth2.GoogleCredentials;
+import lombok.Getter;
 
 import java.io.ByteArrayOutputStream;
-import java.io.FileInputStream;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.security.GeneralSecurityException;
-import java.util.Collections;
 
 import static and.learn.ai.englishtextgenerator.EnglishTextGeneratorMain.APPLICATION_PDF;
 
 /**
  * Classe con metodi statici che si interfaccia con Google Drive
  */
-public class DriveManager {
+@Getter
+public class DriveManager extends AbstractGoogleMananger<Drive> {
 
-    public static final String SERVICE_ACCOUNT_FILE = "src/main/resources/ai/config/englishtextgenerator/service-account.json";
-
-    Drive driveService;
-
-    public DriveManager() throws GeneralSecurityException, IOException {
-        driveService = getDriveService();
+    public DriveManager(GoogleCredentials credentials) throws GeneralSecurityException, IOException {
+        super(credentials);
     }
 
-    public Drive getDriveService() throws GeneralSecurityException, IOException {
-        GoogleCredentials credentials = GoogleCredentials.fromStream(new FileInputStream(SERVICE_ACCOUNT_FILE))
-                .createScoped(Collections.singleton(DriveScopes.DRIVE_READONLY));
-
+    @Override
+    protected Drive createService(GoogleCredentials credentials) throws GeneralSecurityException, IOException {
         return new Drive.Builder(
                 GoogleNetHttpTransport.newTrustedTransport(),
                 GsonFactory.getDefaultInstance(),
@@ -55,7 +48,7 @@ public class DriveManager {
 
         // Esportiamo il file in formato testo semplice (text/plain).
         // Se preferissi mantenere la formattazione per Gemini, potresti usare "application/pdf".
-        driveService.files().export(fileId, "text/plain")
+        serviceClient.files().export(fileId, "text/plain")
                 .executeMediaAndDownloadTo(outputStream);
 
         // Restituisce il contenuto come stringa UTF-8
@@ -69,7 +62,7 @@ public class DriveManager {
         ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
 
         // Per i file nativi Google, l'API 'export' è l'unica via per ottenere il contenuto
-        driveService.files().export(fileId, APPLICATION_PDF)
+        serviceClient.files().export(fileId, APPLICATION_PDF)
                 .executeMediaAndDownloadTo(outputStream);
 
         return outputStream.toByteArray();

@@ -142,12 +142,19 @@
             <version>1.32.0</version>
         </dependency>
 
-        <!-- 2. Accesso a Google Drive -->
+        <!-- 2. Google Drive API -->
         <dependency>
              <groupId>com.google.apis</groupId>
              <artifactId>google-api-services-drive</artifactId>
              <version>v3-rev20241027-2.0.0</version>
          </dependency>
+
+        <!-- Google Documents API-->
+        <dependency>
+            <groupId>com.google.apis</groupId>
+            <artifactId>google-api-services-docs</artifactId>
+            <version>v1-rev20251215-2.0.0</version>
+        </dependency>
 
          <!-- 3. Supporto Autenticazione (Service Account e OAuth2) -->
         <dependency>
