@@ -26,10 +26,15 @@ public class DriveManager extends AbstractGoogleMananger<Drive> {
 
     @Override
     protected Drive createService(GoogleCredentials credentials) throws GeneralSecurityException, IOException {
+        HttpCredentialsAdapter authInitializer = new HttpCredentialsAdapter(credentials);
         return new Drive.Builder(
                 GoogleNetHttpTransport.newTrustedTransport(),
                 GsonFactory.getDefaultInstance(),
-                new HttpCredentialsAdapter(credentials))
+                request -> {
+                    authInitializer.initialize(request);
+                    request.setConnectTimeout(100000);
+                    request.setReadTimeout(100000);
+                })
                 .setApplicationName("Gemini-Doc-Integrator")
                 .build();
     }
