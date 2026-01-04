@@ -1,6 +1,6 @@
-package and.learn.ai.englishtextgenerator.gemini.behaviour.implementation;
+package and.learn.ai.englishtextgenerator.gemini.behaviour.implementation.rest;
 
-import and.learn.ai.englishtextgenerator.gemini.behaviour.ChatGeminiInterface;
+import and.learn.ai.englishtextgenerator.gemini.behaviour.abstraction.ChatGeminiRestAbstract;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
@@ -14,7 +14,7 @@ import java.util.Base64;
 
 import static and.learn.ai.englishtextgenerator.EnglishTextGeneratorMain.*;
 
-public class ChatGeminiInLineFilesRest implements ChatGeminiInterface {
+public class ChatGeminiInLineFilesRest extends ChatGeminiRestAbstract {
 
     /**
      * Chiama Gemini senza effettuare upload dei file
@@ -39,9 +39,8 @@ public class ChatGeminiInLineFilesRest implements ChatGeminiInterface {
         // 3. Aggiunta del secondo PDF (Base64)
         addInlineData(parts, pdf2);
 
-        // Configurazione opzionale (Temperature)
         ObjectNode genConfig = root.putObject("generationConfig");
-        genConfig.put("temperature", TEMPERATURE);
+        genConfig.put("temperature", temperature);
 
         String jsonPayload = mapper.writeValueAsString(root);
         //  System.out.println("Json request: " + jsonPayload);
@@ -49,7 +48,7 @@ public class ChatGeminiInLineFilesRest implements ChatGeminiInterface {
 
         // Creazione e invio della richiesta HTTP
         HttpRequest request = HttpRequest.newBuilder()
-                .uri(URI.create(URL_API_GEMINI))
+                .uri(URI.create(urlApiGemini))
                 .header("Content-Type", "application/json")
                 .POST(HttpRequest.BodyPublishers.ofString(jsonPayload))
                 .build();

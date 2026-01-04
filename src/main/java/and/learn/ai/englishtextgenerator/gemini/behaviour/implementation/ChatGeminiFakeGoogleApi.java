@@ -1,10 +1,10 @@
 package and.learn.ai.englishtextgenerator.gemini.behaviour.implementation;
 
-import and.learn.ai.englishtextgenerator.gemini.behaviour.ChatGeminiInterface;
+import and.learn.ai.englishtextgenerator.gemini.behaviour.abstraction.ChatGeminiAbstract;
 
 import java.io.IOException;
 
-public class ChatGeminiFakeGoogleApi implements ChatGeminiInterface {
+public class ChatGeminiFakeGoogleApi extends ChatGeminiAbstract {
 
     private final static int numRows = 8;
     private static int numRow = 1;
@@ -38,6 +38,4 @@ public class ChatGeminiFakeGoogleApi implements ChatGeminiInterface {
 
         return story.toString();
     }
-
-
 }

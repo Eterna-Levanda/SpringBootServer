@@ -1,6 +1,6 @@
-package and.learn.ai.englishtextgenerator.gemini.behaviour.implementation;
+package and.learn.ai.englishtextgenerator.gemini.behaviour.implementation.api;
 
-import and.learn.ai.englishtextgenerator.gemini.behaviour.ChatGeminiGoogleApiAbstract;
+import and.learn.ai.englishtextgenerator.gemini.behaviour.abstraction.ChatGeminiApiAbstract;
 import com.google.genai.types.Content;
 import com.google.genai.types.GenerateContentResponse;
 import com.google.genai.types.Part;
@@ -8,12 +8,12 @@ import com.google.genai.types.Part;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.LinkedList;
 import java.util.List;
 
 import static and.learn.ai.englishtextgenerator.EnglishTextGeneratorMain.APPLICATION_PDF;
-import static and.learn.ai.englishtextgenerator.EnglishTextGeneratorMain.GEMINI_VERSION;
 
-public class ChatGeminiInLineFilesGoogleApi extends ChatGeminiGoogleApiAbstract {
+public class ChatGeminiInLineFilesApi extends ChatGeminiApiAbstract {
 
     /**
      * Chiama Gemini senza effettuare upload dei file
@@ -24,16 +24,20 @@ public class ChatGeminiInLineFilesGoogleApi extends ChatGeminiGoogleApiAbstract 
 
         // Creazione delle "Parti" della richiesta
         // Gemini accetta una lista di oggetti Part (Testo, Immagini, PDF, etc.)
-        List<Part> promptParts = Arrays.asList(
-                Part.fromText(promptText),
-                Part.fromBytes(file1, APPLICATION_PDF),
-                Part.fromBytes(file2, APPLICATION_PDF)
-        );
+        List<Part> promptParts = new LinkedList<>();
+        promptParts.add(Part.fromText(promptText));
+
+        if(file1 != null) {
+            promptParts.add(Part.fromBytes(file1, APPLICATION_PDF));
+        }
+        if(file1 != null) {
+            promptParts.add(Part.fromBytes(file2, APPLICATION_PDF));
+        }
 
         // Chiamata al modello
         // Nota: Usiamo una lista di Part invece di una singola stringa
         response = client.models.generateContent(
-                GEMINI_VERSION,
+                geminiModel,
                 promptParts.toString(),
                 config
         );
@@ -65,7 +69,7 @@ public class ChatGeminiInLineFilesGoogleApi extends ChatGeminiGoogleApiAbstract 
             // 3. Chiamata al modello passando TUTTA la history
             // Nota: passiamo 'chatHistory' al posto della singola lista di Part
             GenerateContentResponse response = client.models.generateContent(
-                    GEMINI_VERSION,
+                    geminiModel,
                     chatHistory,
                     config
             );

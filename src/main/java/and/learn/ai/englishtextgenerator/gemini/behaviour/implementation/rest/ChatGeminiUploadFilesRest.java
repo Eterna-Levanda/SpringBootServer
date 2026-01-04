@@ -1,6 +1,6 @@
-package and.learn.ai.englishtextgenerator.gemini.behaviour.implementation;
+package and.learn.ai.englishtextgenerator.gemini.behaviour.implementation.rest;
 
-import and.learn.ai.englishtextgenerator.gemini.behaviour.ChatGeminiInterface;
+import and.learn.ai.englishtextgenerator.gemini.behaviour.abstraction.ChatGeminiRestAbstract;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 
@@ -12,7 +12,9 @@ import java.net.http.HttpResponse;
 
 import static and.learn.ai.englishtextgenerator.EnglishTextGeneratorMain.*;
 
-public class ChatGeminiUploadFilesRest implements ChatGeminiInterface {
+public class ChatGeminiUploadFilesRest extends ChatGeminiRestAbstract {
+
+    public static final String URL_UPLOAD = "https://generativelanguage.googleapis.com/upload/v1beta/files?key=";
 
     /**
      * Questo metodo effetua upload
@@ -56,7 +58,7 @@ public class ChatGeminiUploadFilesRest implements ChatGeminiInterface {
                         }
                       ],
                       "generationConfig": {
-                          "temperature":"""+TEMPERATURE+"""
+                          "temperature":"""+temperature+"""
                         }
                     }
                     """.formatted(
@@ -66,7 +68,7 @@ public class ChatGeminiUploadFilesRest implements ChatGeminiInterface {
             );
 
             HttpRequest request = HttpRequest.newBuilder()
-                    .uri(URI.create(URL_API_GEMINI))
+                    .uri(URI.create(urlApiGemini))
                     .header("Content-Type", APPLICATION_PDF)
                     .POST(HttpRequest.BodyPublishers.ofString(requestBody))
                     .build();
@@ -110,7 +112,7 @@ public class ChatGeminiUploadFilesRest implements ChatGeminiInterface {
 
         HttpRequest request = HttpRequest.newBuilder()
                 .uri(URI.create(
-                        "https://generativelanguage.googleapis.com/upload/v1beta/files?key=" + API_KEY))
+                        URL_UPLOAD + API_KEY))
                 .header("Content-Type", APPLICATION_PDF)
                 .header("X-Goog-Upload-Protocol", "raw")
                 .POST(HttpRequest.BodyPublishers.ofByteArray(pdfBytes))

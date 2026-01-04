@@ -1,6 +1,6 @@
-package and.learn.ai.englishtextgenerator.gemini.behaviour.implementation;
+package and.learn.ai.englishtextgenerator.gemini.behaviour.implementation.api;
 
-import and.learn.ai.englishtextgenerator.gemini.behaviour.ChatGeminiGoogleApiAbstract;
+import and.learn.ai.englishtextgenerator.gemini.behaviour.abstraction.ChatGeminiApiAbstract;
 import com.google.genai.types.*;
 import org.jspecify.annotations.NonNull;
 
@@ -10,7 +10,7 @@ import java.util.List;
 
 import static and.learn.ai.englishtextgenerator.EnglishTextGeneratorMain.*;
 
-public class ChatGeminiUploadFilesGoogleApi extends ChatGeminiGoogleApiAbstract {
+public class ChatGeminiUploadFilesApi extends ChatGeminiApiAbstract {
 
     /**
      * Chiama Gemini effettuando upload dei file
@@ -23,7 +23,7 @@ public class ChatGeminiUploadFilesGoogleApi extends ChatGeminiGoogleApiAbstract 
         List<Part> promptParts = uploadFiles(file1, file2, promptText);
 
         response = client.models.generateContent(
-                GEMINI_VERSION,
+                geminiModel,
                 promptParts.toString(),
                 null
         );
@@ -48,7 +48,7 @@ public class ChatGeminiUploadFilesGoogleApi extends ChatGeminiGoogleApiAbstract 
             // Chiamata al modello passando TUTTA la history
             // Importante: passiamo la lista chatHistory direttamente
             GenerateContentResponse response = client.models.generateContent(
-                    GEMINI_VERSION,
+                    geminiModel,
                     chatHistory,
                     null
             );

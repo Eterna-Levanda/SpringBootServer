@@ -1,4 +1,4 @@
-package and.learn.ai.englishtextgenerator.gemini.behaviour;
+package and.learn.ai.englishtextgenerator.gemini.behaviour.abstraction;
 
 import com.google.genai.Client;
 import com.google.genai.types.Content;
@@ -12,25 +12,18 @@ import java.util.List;
 
 import static and.learn.ai.englishtextgenerator.EnglishTextGeneratorMain.*;
 
-public abstract class ChatGeminiGoogleApiAbstract implements ChatGeminiInterface {
+public abstract class ChatGeminiApiAbstract extends ChatGeminiAbstract {
 
     protected final Client client;
     protected List<Content> chatHistory;
     protected GenerateContentConfig config;
 
-    protected ChatGeminiGoogleApiAbstract() {
+    protected ChatGeminiApiAbstract() {
+        super();
         client = Client.builder().apiKey(API_KEY).build();
         chatHistory = new ArrayList<>();
-        config = GenerateContentConfig.builder()
-                .temperature(TEMPERATURE)
-                .build();
+        config = getGenerateContentConfig();
     }
-
-    @Override
-    public abstract String sendMessageWithFiles(String promptText, byte[] file1, byte[] file2) throws IOException;
-
-    @Override
-    public abstract String sendMessageWithFilesUsingMemory(String promptText, byte[] file1, byte[] file2) throws IOException;
 
     @Override
     public String sendMessageUsingMemory(String promptText) throws IOException {
@@ -47,10 +40,11 @@ public abstract class ChatGeminiGoogleApiAbstract implements ChatGeminiInterface
             // 3. Inviamo l'INTERA storia al modello
             // L'SDK riconosce che passando una lista di Content si tratta di una chat
             GenerateContentResponse response = client.models.generateContent(
-                    GEMINI_VERSION,
+                    geminiModel,
                     chatHistory,
                     config
             );
+
 
             // 4. Estraiamo il testo della risposta
             String botResponseText = response.text();
@@ -78,14 +72,22 @@ public abstract class ChatGeminiGoogleApiAbstract implements ChatGeminiInterface
     @Override
     public String sendMessage(String promptText) throws IOException {
         GenerateContentResponse response = client.models.generateContent(
-                GEMINI_VERSION,
+                geminiModel,
                 promptText,
                 config
         );
-
-        // Restituiamo il testo generato dal modello
         return response.text();
     }
 
+    @Override
+    public void setTemperature(float temperature){
+        super.setTemperature(temperature);
+        config = getGenerateContentConfig();
+    }
 
+    private GenerateContentConfig getGenerateContentConfig() {
+        return GenerateContentConfig.builder()
+                .temperature(temperature)
+                .build();
+    }
 }

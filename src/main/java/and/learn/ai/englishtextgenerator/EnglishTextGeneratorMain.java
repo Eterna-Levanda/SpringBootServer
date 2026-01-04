@@ -4,7 +4,7 @@ import and.learn.ai.englishtextgenerator.googleservice.DocsManager;
 import and.learn.ai.englishtextgenerator.googleservice.DriveManager;
 import and.learn.ai.englishtextgenerator.gemini.behaviour.ChatGeminiBehaviour;
 import and.learn.ai.englishtextgenerator.gemini.behaviour.ChatGeminiBehaviourSwitcher;
-import and.learn.ai.englishtextgenerator.gemini.behaviour.ChatGeminiInterface;
+import and.learn.ai.englishtextgenerator.gemini.behaviour.abstraction.ChatGeminiAbstract;
 import and.learn.ai.englishtextgenerator.googleservice.GoogleServicesFactory;
 import lombok.extern.log4j.Log4j2;
 import org.jspecify.annotations.NonNull;
@@ -19,44 +19,33 @@ import java.util.stream.Stream;
 
 @Log4j2
 public class EnglishTextGeneratorMain {
+
     // Parametri applicativi
-    public static final float TEMPERATURE = 0.7f;
-    private static final int NUM_RIGHE_PER_BLOCCO_IN_STORIA_ORIGINALE = 2;
-    private static final int NUM_RIGHE_PER_PARAGRAFO = 3;
     private static final String SEPARATORE_PROMPT = "PROMPT_2";
-    private static final int NUMERO_REGOLE_SINGOLA_RICHIESTA = 4;
+    private static final int NUMERO_REGOLE_SINGOLA_RICHIESTA = 3;
     private static final int NUM_CARATTERI_PER_SINGOLO_PARAGRAFO = 1000;
-    public static final String GEMINI_VERSION = "gemini-3-flash-preview";
-    /*  gemini-flash-latest
-
-        gemini-2.0-flash-lite - alla prima richiesta ha fallito
-        gemini-2.0-flash - alla prima richiesta ha fallito
-        gemini-2.5-pro - alla prima richiesta ha fallito
-        gemini-2.5-flash-lite - usato alla grande
-        gemini-2.5-flash - usato alla grande
-        gemini-3-flash-preview - usato alla grande
-        gemini-3-pro-preview - alla prima richiesta ha fallito
-     */
-
-
-    // Prompt
-    public static final String TRANSLATE_TEXT_PROMPT = "Translate this text in Italian keeping as much as possibile the fidelity with the original text in English. Don't add any your comment. This is the text. ";
-    public static final String APPLY_RULES_PROMPT = "Rewrite this story trying when possibile to add the following grammar rules. ";
-    // Stringhe maggiormente usate
-    public static final String APPLICATION_PDF = "application/pdf";
-    public static final String LINE_BREAK = "\n";
-    public static final String SERIE_DI_LINE_BREAK = "\n\n\n\n\n\n\n\n\n";
 
     // Costanti valorizzate a runtime
     // Caricamento della chiave API e del Service Account
     public static final String API_KEY;
-    public static final String URL_API_GEMINI;
     // ID dei tuoi Google Docs
-    private static final String DOC_ID_PROMPT;
+    private static final String DOC_ID_MAIN_PROMPT;
     private static final String DOC_ID_ERRORI_FREQUENTI;
     private static final String DOC_ID_SINONIMI;
     private static final String DOC_ID_STORIA_CREATA;
+    private static final String DOC_ID_GERUND_INFINITIVE;
 
+    // Prompt
+    public static final String TRANSLATE_TEXT_PROMPT = "Translate this text in Italian keeping as much as possibile the fidelity with the original text in English. Don't add any your comment. This is the text. ";
+    public static final String APPLY_RULES_PROMPT = "Rewrite this story trying when possibile to add the following grammar rules. ";
+    public static final String GERUND_INFINITIVE_PROMPT = "Read the document attached containing many examples of usage of verb in gerund or infinitive form. Choose a few of them and apply them to the story in very natural way in order to have the story with a few of those verbs. The following is the story. ";
+    public static final String SYNONYMS_PROMPT = "Read the document attached containing many words and their synonyms. Try to apply a few of them to the story in very natural way in order to have the story with a few of those synonyms. The following is the story. ";
+    public static final String IMPROVE_STORY_PROMPT = "Read the following story in order to improve the readability, avoiding repetition and correcting very innatural sentences. The following is the story. ";
+
+    // Stringhe maggiormente usate
+    public static final String APPLICATION_PDF = "application/pdf";
+    public static final String LINE_BREAK = "\n";
+    public static final String SERIE_DI_LINE_BREAK = "\n\n\n\n\n\n\n\n\n";
 
     static {
         //inizializzazione delle costanti tramite file di properties
@@ -73,30 +62,29 @@ public class EnglishTextGeneratorMain {
         }
 
         API_KEY = map.get("apiKey");
-        DOC_ID_PROMPT = map.get("docIdPrompt");
+        DOC_ID_MAIN_PROMPT = map.get("docIdPrompt");
         DOC_ID_ERRORI_FREQUENTI = map.get("docIdErroriFrequenti");
         DOC_ID_SINONIMI = map.get("docIdSinonimi");
         DOC_ID_STORIA_CREATA = map.get("docIdStoriaCreata");
-
-        URL_API_GEMINI = "https://generativelanguage.googleapis.com/v1beta/models/" + GEMINI_VERSION + ":generateContent?key="
-                + API_KEY;
+        DOC_ID_GERUND_INFINITIVE = map.get("docIdGerundInfinitive");
     }
 
-    private static ChatGeminiInterface chatGemini;
+    private static ChatGeminiAbstract chatGemini;
 
     public static void main(String[] args) throws Exception {
 
         GoogleServicesFactory googleServicesFactory = new GoogleServicesFactory();
         DriveManager driveManager = googleServicesFactory.getDriveManager();
 
-        // Lettura dei documenti Drive (Operazione specifica per file nativi)
-        String filePrompts = driveManager.extractNativeDocText(DOC_ID_PROMPT);
+        // Lettura dei documenti Drive
+        String filePrompts = driveManager.extractNativeDocText(DOC_ID_MAIN_PROMPT);
         PromptForGenerateText coppiaDiPrompt = splitByString(filePrompts);
         String promptIniziale = coppiaDiPrompt.firstPrompt();
         String promptRequisitiGrammaticali = coppiaDiPrompt.secondPrompt();
 
         byte[] contentSinonimi = driveManager.exportNativeDoc(DOC_ID_SINONIMI);
         byte[] contentErroriFrequenti = driveManager.exportNativeDoc(DOC_ID_ERRORI_FREQUENTI);
+        byte[] contentGerundInfinitive = driveManager.exportNativeDoc(DOC_ID_GERUND_INFINITIVE);
 
         log("Documenti Drive scaricati con successo. Ora verrà generato il testo con Gemini.");
 
@@ -105,19 +93,40 @@ public class EnglishTextGeneratorMain {
 
         String storia;
         //creo la storia
-        storia = chatGemini.sendMessageWithFilesUsingMemory(promptIniziale, contentSinonimi, contentErroriFrequenti);
+        chatGemini.setTemperature(1.5f);
+        storia = sendPromptWithFiles(promptIniziale, contentSinonimi, contentErroriFrequenti);
 
         log("Storia creata originale:\n" + storia);
 
         //riscrivi la storia N volte aggiungendo ogni volta delle regole grammaticali
         List<List<String>> rules = groupGrammarRules(promptRequisitiGrammaticali);
+        chatGemini.setTemperature(0.9f);
         for (int i = 0; i < rules.size(); i++) {
             log("Applico la serie di regole n. " + (i + 1) + " ovvero " + rules.get(i));
-            storia = chatWithGemini(storia, rules.get(i).toString());
+            String promptRequisitiGrammaticali1 = rules.get(i).toString();
+            storia = sendPromptWithFiles(APPLY_RULES_PROMPT + promptRequisitiGrammaticali1 + LINE_BREAK + storia, null, null);
         }
+
+        //applico gerundio/infinito
+        chatGemini.setTemperature(1.3f);
+        for (int i = 0; i < 2; i++) {
+            log("Applico gerundio/infinito per la " + (i+1) + " volta");
+            sendPromptWithFiles(GERUND_INFINITIVE_PROMPT + storia, contentGerundInfinitive, null);
+        }
+
+        //di nuovo i sinonimi
+        log("Aggiungo i sinonimi");
+        chatGemini.setTemperature(1.3f);
+        sendPromptWithFiles(SYNONYMS_PROMPT + storia, contentSinonimi, null);
+
+        //miglioro la storia
+        log("Miglioro la storia");
+        chatGemini.setTemperature(0.9f);
+        sendPromptWithFiles(IMPROVE_STORY_PROMPT + storia, null, null);
+
         log(storia);
 
-       // storia = setStoria();
+        // storia = setStoria();
 
         //estraggo il titolo e lo rimuovo dalla storia
         List<String> righeDellaStoria = suddividiRighe(storia);
@@ -127,6 +136,7 @@ public class EnglishTextGeneratorMain {
         List<String> blocchi = raggruppaRigheInBlocchiLunghiAlmenoNCaratteri(righeDellaStoria);
 
         log("Ora chiedo la traduzione dei paragrafi, in totale sono " + blocchi.size());
+        chatGemini.setTemperature(0.8f);
         List<String> paragrafiTradotti = traduciParagrafi(blocchi);
 
         log("Testo in italiano!\n");
@@ -161,19 +171,14 @@ public class EnglishTextGeneratorMain {
 
     /**
      * Divide una stringa in due parti basandosi su un separatore.
-     * * @param input La stringa originale (es: "User: Mario Rossi")
      *
-     * @return Un oggetto Pair con la parte sinistra e la parte destra.
-     * Se il separatore non viene trovato, la prima parte contiene l'intero input
-     * e la seconda è una stringa vuota.
+     * @return Un oggetto Pair con la parte a sinistra e la parte a destra del separatore
      */
     public static PromptForGenerateText splitByString(String input) {
 
         int index = input.indexOf(SEPARATORE_PROMPT);
-
         String left = input.substring(0, index);
         String right = input.substring(index + SEPARATORE_PROMPT.length());
-
         return new PromptForGenerateText(left, right);
     }
 
@@ -188,7 +193,7 @@ public class EnglishTextGeneratorMain {
                 .map(line -> line.substring(1).trim()) // Rimuoviamo l'asterisco
                 .collect(Collectors.toList());
 
-        // 2. Raggruppamento (Partitioning)
+        // 2. Raggruppamento
         List<List<String>> groups = new ArrayList<>();
         for (int i = 0; i < allRules.size(); i += NUMERO_REGOLE_SINGOLA_RICHIESTA) {
             int end = Math.min(i + NUMERO_REGOLE_SINGOLA_RICHIESTA, allRules.size());
@@ -216,23 +221,39 @@ public class EnglishTextGeneratorMain {
         return storia.toString();
     }
 
-    private static List<String> traduciParagrafi(List<String> paragrafiAllungati) {
+    private static List<String> traduciParagrafi(List<String> paragrafiAllungati) throws IOException {
 
         List<String> paragrafiTradotti = new ArrayList<>();
         int numParagrafo = 1;
         for (String paragrafo : paragrafiAllungati) {
-            try {
-                log("Chiedo traduzione del paragrafo n. " + numParagrafo);
-                String paragrafoTradotto = chatGemini.sendMessage(TRANSLATE_TEXT_PROMPT + paragrafo);
-                String paragrafoPulito = eliminaRigheVuoteEAsterischi(paragrafoTradotto);
-                paragrafiTradotti.add(paragrafoPulito);
-                numParagrafo++;
-            } catch (IOException e) {
-                throw new RuntimeException(e);
-            }
+
+            log("Chiedo traduzione del paragrafo n. " + numParagrafo);
+            String paragrafoTradotto = sendPromptWithFiles(TRANSLATE_TEXT_PROMPT + paragrafo, null, null);
+            String paragrafoPulito = eliminaRigheVuoteEAsterischi(paragrafoTradotto);
+            paragrafiTradotti.add(paragrafoPulito);
+            numParagrafo++;
         }
 
         return paragrafiTradotti;
+    }
+
+    private static String sendPromptWithFiles(String prompt, byte[] file1, byte[] file2) {
+
+        String response;
+        try {
+            if (file1 != null || file2 != null) {
+                response = chatGemini.sendMessageWithFilesUsingMemory(prompt, file1, file2);
+            } else {
+                response = chatGemini.sendMessageUsingMemory(prompt);
+            }
+        } catch (Exception e) {
+            //ho esaurito i token di un modello gratuito, ora passo al successivo
+            //TODO cattura la specifica eccezione! IOException al momento...
+            chatGemini.changeModello();
+            response = sendPromptWithFiles(prompt, file1, file2);
+        }
+        return response;
+
     }
 
     private static @NonNull String eliminaRigheVuoteEAsterischi(String paragrafoAllungato) {
@@ -240,10 +261,6 @@ public class EnglishTextGeneratorMain {
                 .filter(line -> !line.isBlank())
                 .map(p -> p.replace("*", ""))
                 .collect(Collectors.joining(LINE_BREAK));
-    }
-
-    private static String chatWithGemini(String paragrafo, String promptRequisitiGrammaticali) throws IOException {
-        return chatGemini.sendMessageUsingMemory(APPLY_RULES_PROMPT + promptRequisitiGrammaticali + LINE_BREAK + paragrafo);
     }
 
     private static List<String> suddividiRighe(String risposta) {
