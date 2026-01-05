@@ -1,10 +1,7 @@
 package and.learn.ai.englishtextgenerator.gemini.behaviour.abstraction;
 
 import com.google.genai.Client;
-import com.google.genai.types.Content;
-import com.google.genai.types.GenerateContentConfig;
-import com.google.genai.types.GenerateContentResponse;
-import com.google.genai.types.Part;
+import com.google.genai.types.*;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -86,8 +83,14 @@ public abstract class ChatGeminiApiAbstract extends ChatGeminiAbstract {
     }
 
     private GenerateContentConfig getGenerateContentConfig() {
+        //imposto la capacità di pensare!
+        ThinkingConfig thinking = ThinkingConfig.builder()
+                .includeThoughts(true)
+                .build();
+
         return GenerateContentConfig.builder()
                 .temperature(temperature)
+                .thinkingConfig(thinking)
                 .build();
     }
 }

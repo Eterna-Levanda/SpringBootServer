@@ -21,6 +21,7 @@ public abstract class ChatGeminiAbstract {
             "gemini-2.5-flash-lite",// - usato alla grande
             "gemini-2.5-flash",// - usato alla grande
             "gemini-3-flash-preview",// - usato alla grande
+            "gemini-3-flash", //mai provato
             "gemini-2.0-flash-lite",// - alla prima richiesta ha fallito
             "gemini-2.0-flash",// - alla prima richiesta ha fallito
             "gemini-2.5-pro",// - alla prima richiesta ha fallito
@@ -44,7 +45,7 @@ public abstract class ChatGeminiAbstract {
 
     public void changeModello() {
         if(!modelli.isEmpty()){
-            geminiModel = modelli.remove(modelli.size() - 1);
+            geminiModel = modelli.remove(0);
             System.out.println("Cambio modello di Gemini. Ora si usa " + geminiModel);
         } else {
             throw new IllegalStateException("Modelli di Gemini terminati");
