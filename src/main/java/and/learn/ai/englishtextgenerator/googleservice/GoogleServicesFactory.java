@@ -14,7 +14,7 @@ import java.util.List;
 @Getter
 public class GoogleServicesFactory {
 
-    public static final String SERVICE_ACCOUNT_FILE = "src/main/resources/ai/config/englishtextgenerator/service-account.json";
+    public static final String SERVICE_ACCOUNT_FILE = "src/main/resources/ai/englishtextgenerator/config/service-account.json";
 
     private final DriveManager driveManager;
     private final DocsManager docsManager;

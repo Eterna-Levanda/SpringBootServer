@@ -13,6 +13,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.nio.file.StandardOpenOption;
 import java.util.*;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -24,8 +25,12 @@ public class EnglishTextGeneratorMain {
 
     // Parametri applicativi
     private static final String SEPARATORE_PROMPT = "PROMPT_2";
-    private static final int NUMERO_REGOLE_SINGOLA_RICHIESTA = 4;
-    private static final int NUM_CARATTERI_PER_SINGOLO_PARAGRAFO = 1500;
+    private static final String PATH_PROPERTIES = "src/main/resources/ai/englishtextgenerator/config/secret.properties";
+    public static final String PATH_PROMPT_LOG = "src/main/resources/ai/englishtextgenerator/prompt_log";
+
+    //parametri che cambiano il comportamento dell'applicativo
+    private static final int NUMERO_REGOLE_SINGOLA_RICHIESTA = 3;
+    private static final int NUM_CARATTERI_PER_SINGOLO_PARAGRAFO = 800;
 
     // Costanti valorizzate a runtime
     // Caricamento della chiave API e del Service Account
@@ -44,17 +49,20 @@ public class EnglishTextGeneratorMain {
     private static final String SYNONYMS_PROMPT = "Read the document attached containing many words and their synonyms. Try to apply 4 or 5 of them to the story in very natural way in order to have the story with a few of those synonyms. " + FINAL_RECOMMENDATION;
     private static final String LONGER_STORY_PROMPT = "Rewrite this story making it around 50 % longer, while continuing to apply the previously requested requirements. " + FINAL_RECOMMENDATION;
     private static final String IMPROVE_STORY_PROMPT = "Read the following story in order to improve the readability, avoiding repetition and correcting very innatural sentences. This is the story. ";
-
     private static final String TRANSLATE_TEXT_PROMPT = "Translate from English to Italian using a natural, conversational tone. Avoid literal translations. Adapt idiomatic expressions so that they sound as if they were spoken by a native Italian speaker in a real conversation. Don't add any your comment. This is the text. ";
 
     // Stringhe maggiormente usate
     private static final String LINE_BREAK = "\n";
     private static final String SERIE_DI_LINE_BREAK = "\n\n\n\n\n\n\n\n\n";
 
+    // Usato per creare file di log univoci
+    private static int numFile = 0;
+
+
     static {
         //inizializzazione delle costanti tramite file di properties
         Properties props = new Properties();
-        try (InputStream is = Files.newInputStream(Path.of("src/main/resources/ai/config/englishtextgenerator/secret.properties"))) {
+        try (InputStream is = Files.newInputStream(Path.of(PATH_PROPERTIES))) {
             props.load(is);
         } catch (IOException e) {
             throw new RuntimeException(e);
@@ -76,6 +84,9 @@ public class EnglishTextGeneratorMain {
     private static ChatGeminiAbstract chatGemini;
 
     public static void main(String[] args) throws Exception {
+
+        //dovrebbe valere SpringBootServer
+        String currentFolder = System.getProperty("user.dir");
 
         GoogleServicesFactory googleServicesFactory = new GoogleServicesFactory();
         DriveManager driveManager = googleServicesFactory.getDriveManager();
@@ -100,7 +111,7 @@ public class EnglishTextGeneratorMain {
         chatGemini.setTemperature(0.8f);
         storia = sendPromptWithFiles(promptIniziale, contentSinonimi, contentErroriFrequenti);
 
-        log("Storia creata originale:\n" + storia);
+        log("Storia creata");
 
         //riscrivi la storia N volte aggiungendo ogni volta delle regole grammaticali
         List<List<String>> requirements = groupGrammarRules(elencoRequisitiGrammaticali);
@@ -114,7 +125,7 @@ public class EnglishTextGeneratorMain {
         //applico gerundio/infinito
         chatGemini.setTemperature(0.4f);
         for (int i = 0; i < 2; i++) {
-            log("Applico gerundio/infinito per la " + (i+1) + " volta");
+            log("Applico gerundio/infinito per la " + (i + 1) + " volta");
             storia = sendPromptWithFiles(GERUND_INFINITIVE_PROMPT + storia, contentGerundInfinitive, null);
         }
 
@@ -133,8 +144,6 @@ public class EnglishTextGeneratorMain {
         chatGemini.setTemperature(0.3f);
         storia = sendPromptWithFiles(IMPROVE_STORY_PROMPT + storia, null, null);
 
-        log(storia);
-
         // storia = setStoria();
 
         //estraggo il titolo e lo rimuovo dalla storia
@@ -142,17 +151,17 @@ public class EnglishTextGeneratorMain {
         String titolo = righeDellaStoria.remove(0);
 
         //miglioro il raggruppamento dei paragrafi
-        List<String> blocchi = raggruppaRigheInBlocchiLunghiAlmenoNCaratteri(righeDellaStoria);
+        List<String> paragrafi = raggruppaRigheInParagrafiLunghiAlmenoNCaratteri(righeDellaStoria);
 
-        log("Ora chiedo la traduzione dei paragrafi, in totale sono " + blocchi.size());
+        log("Ora chiedo la traduzione dei paragrafi, in totale sono " + paragrafi.size());
         chatGemini.setTemperature(0.3f);
-        List<String> paragrafiTradotti = traduciParagrafi(blocchi);
+        List<String> paragrafiTradotti = traduciParagrafi(paragrafi);
 
         log("Testo in italiano!\n");
         String storiaTradottaDaStampare = stampa(paragrafiTradotti);
 
         log("Testo in inglese!\n");
-        String storiaOriginaleDaStampare = stampa(blocchi);
+        String storiaOriginaleDaStampare = stampa(paragrafi);
 
         log("Creazione del file su Drive contenente la storia creata");
         DocsManager docsManager = googleServicesFactory.getDocsManager();
@@ -161,7 +170,7 @@ public class EnglishTextGeneratorMain {
         log("File creato correttamente sul Drive!");
     }
 
-    private static List<String> raggruppaRigheInBlocchiLunghiAlmenoNCaratteri(List<String> righeDellaStoria) {
+    private static List<String> raggruppaRigheInParagrafiLunghiAlmenoNCaratteri(List<String> righeDellaStoria) {
         //NUM_CARATTERI_PER_SINGOLO_PARAGRAFO
         List<String> paragrafi = new ArrayList<>();
         String rigaTemp = "";
@@ -224,8 +233,8 @@ public class EnglishTextGeneratorMain {
 
     private static String stampa(List<String> paragrafi) {
         StringBuilder storia = new StringBuilder();
-        paragrafi.forEach(p -> {
-            storia.append(p).append(LINE_BREAK).append(LINE_BREAK);
+        paragrafi.forEach(paragrafo -> {
+            storia.append(paragrafo).append(LINE_BREAK).append(LINE_BREAK);
         });
         return storia.toString();
     }
@@ -248,6 +257,8 @@ public class EnglishTextGeneratorMain {
 
     private static String sendPromptWithFiles(String prompt, byte[] file1, byte[] file2) {
 
+        logSuFile(prompt);
+
         String response;
         try {
             if (file1 != null || file2 != null) {
@@ -255,6 +266,7 @@ public class EnglishTextGeneratorMain {
             } else {
                 response = chatGemini.sendMessageUsingMemory(prompt);
             }
+
         } catch (IOException e) {
             //ho esaurito i token di un modello gratuito, ora passo al successivo
             chatGemini.changeModello();
@@ -262,6 +274,41 @@ public class EnglishTextGeneratorMain {
         }
         return response;
 
+    }
+
+    private static void logSuFile(String prompt) {
+
+        // Definiamo il percorso relativo
+        Path dirPath = Path.of(PATH_PROMPT_LOG);
+
+        try (Stream<Path> files = Files.walk(dirPath)) {
+            // Se numFile è 0, svuota la cartella prima di iniziare
+            if (numFile == 0 && Files.exists(dirPath)) {
+                // Seleziona solo i file, evita di eliminare la cartella stessa
+                files.filter(Files::isRegularFile)
+                        .forEach(file -> {
+                            try {
+                                Files.delete(file);
+                            } catch (IOException e) {
+                                System.err.println("Errore eliminazione file: " + file);
+                            }
+                        });
+                System.out.println("Cartella log pulita con successo.");
+            }
+
+            numFile++;
+            String fileName = "Prompt_" + numFile + ".txt";
+            Path filePath = dirPath.resolve(fileName);
+
+            // 2. Scrive il file (sovrascrive se esiste, lo crea se manca)
+            Files.writeString(filePath, prompt, StandardOpenOption.CREATE, StandardOpenOption.TRUNCATE_EXISTING);
+
+            System.out.println("Log del prompt salvato con successo: " + filePath.toAbsolutePath());
+
+        } catch (IOException e) {
+            System.err.println("Errore durante il salvataggio del log: " + e.getMessage());
+            e.printStackTrace();
+        }
     }
 
     private static @NonNull String eliminaRigheVuoteEAsterischi(String paragrafoAllungato) {
