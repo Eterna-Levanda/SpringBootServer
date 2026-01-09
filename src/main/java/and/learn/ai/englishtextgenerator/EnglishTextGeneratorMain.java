@@ -44,7 +44,7 @@ public class EnglishTextGeneratorMain {
 
     // Prompt
     private static final String FINAL_RECOMMENDATION = "Be sure the story you are working with continues to sound natural and the plot coherent and sensible. Even more important: the text must be understandable for a B2 student, do not use more complicated words. This is the story. ";
-    private static final String APPLY_RULES_PROMPT = "Where it sounds naturally, apply to the story the following grammar rules a couple of times. Doing this, do not modify sentences already changed, but add new short text. Do not remove XXX The rules are enclosed in square brackets. " + FINAL_RECOMMENDATION;
+    private static final String APPLY_RULES_PROMPT = "Where it sounds naturally, apply to the story the following grammar rules a couple of times. Doing this, do not modify sentences already changed, but add new short text. The rules are enclosed in square brackets. " + FINAL_RECOMMENDATION;
     private static final String GERUND_INFINITIVE_PROMPT = "Read the document attached containing many examples of usage of verb in gerund or infinitive form. Choose 4 or 5 of them and apply them to the story changing slightly the needed sentences in a very natural way in order to have the story with a few of those verbs. " + FINAL_RECOMMENDATION;
     private static final String SYNONYMS_PROMPT = "Read the document attached containing many words and their synonyms. Try to apply 7 or 8 of them to the story changing slightly the needed sentences in a very natural way, in order to have the story with a few of those synonyms. " + FINAL_RECOMMENDATION;
     private static final String LONGER_STORY_PROMPT = "Analize every paragraph of this story making it around 50 % longer, while continuing to apply the previously requested requirements. " + FINAL_RECOMMENDATION;
@@ -133,14 +133,14 @@ public class EnglishTextGeneratorMain {
         storia = sendPromptWithFiles(SYNONYMS_PROMPT + storia, contentSinonimi, null);
 
         //allungo la storia
-        log("Allungo la storia");
+        /*log("Allungo la storia");
         chatGemini.setTemperature(0.5f);
         storia = sendPromptWithFiles(LONGER_STORY_PROMPT + storia, null, null);
 
         //miglioro la storia
         log("Miglioro la storia");
         chatGemini.setTemperature(0.3f);
-        storia = sendPromptWithFiles(IMPROVE_STORY_PROMPT + storia, null, null);
+        storia = sendPromptWithFiles(IMPROVE_STORY_PROMPT + storia, null, null);*/
 
         // storia = setStoria();
 
