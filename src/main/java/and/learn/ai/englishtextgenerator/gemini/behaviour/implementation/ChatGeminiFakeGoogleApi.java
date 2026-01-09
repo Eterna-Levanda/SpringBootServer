@@ -9,23 +9,28 @@ public class ChatGeminiFakeGoogleApi extends ChatGeminiAbstract {
     private final static int numRows = 8;
     private static int numRow = 1;
 
+    public ChatGeminiFakeGoogleApi(String apiKey) {
+        //apiKey nullo perchè fake
+        super(null);
+    }
+
     @Override
-    public String sendMessage(String promptText) throws IOException {
+    public String sendMessage(String promptText) {
         return createFakeStory();
     }
 
     @Override
-    public String sendMessageWithFiles(String promptText, byte[] file1, byte[] file2) throws IOException {
+    public String sendMessageWithFiles(String promptText, byte[] file1, byte[] file2) {
         return createFakeStory();
     }
 
     @Override
-    public String sendMessageUsingMemory(String promptText) throws IOException {
+    public String sendMessageUsingMemory(String promptText) {
         return createFakeStory();
     }
 
     @Override
-    public String sendMessageWithFilesUsingMemory(String promptText, byte[] file1, byte[] file2) throws IOException {
+    public String sendMessageWithFilesUsingMemory(String promptText, byte[] file1, byte[] file2) {
         return createFakeStory();
     }
 

@@ -12,6 +12,10 @@ import static and.learn.ai.englishtextgenerator.EnglishTextGeneratorMain.*;
 
 public class ChatGeminiUploadFilesApi extends ChatGeminiApiAbstract {
 
+    public ChatGeminiUploadFilesApi(String apiKey) {
+        super(apiKey);
+    }
+
     /**
      * Chiama Gemini effettuando upload dei file
      */

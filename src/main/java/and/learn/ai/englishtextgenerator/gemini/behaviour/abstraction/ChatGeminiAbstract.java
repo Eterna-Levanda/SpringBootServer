@@ -14,11 +14,10 @@ public abstract class ChatGeminiAbstract {
 
     protected float temperature;
     protected String apiKey;
-    protected String modello;
 
     private static final List<String> modelli = new ArrayList<>(Arrays.asList(
             "gemini-flash-latest",
-            "gemini-2.5-flash-lite",// - usato alla grande
+            "gemini-2.5-flash-lite",// - usato alla grande ma non applica le regole!
             "gemini-2.5-flash",// - usato alla grande
             "gemini-3-flash-preview",// - usato alla grande
             "gemini-3-flash", //mai provato
@@ -26,10 +25,12 @@ public abstract class ChatGeminiAbstract {
             "gemini-2.0-flash",// - alla prima richiesta ha fallito
             "gemini-2.5-pro",// - alla prima richiesta ha fallito
             "gemini-3-pro-preview",// - alla prima richiesta ha fallito
-            "gemini-2.0-flash-thinking-exp-1219"// - in grado di pensare ma consuma token
+            "gemini-1.5-flash",//da provare
+            "gemini-1.5-flash-pro"//da provare
     ));
 
-    protected ChatGeminiAbstract() {
+    protected ChatGeminiAbstract(String apiKey) {
+        this.apiKey = apiKey;
         temperature = 1;
         geminiModel = modelli.remove(0);
         System.out.println("Primo modello di Gemini: " + geminiModel);
@@ -51,6 +52,4 @@ public abstract class ChatGeminiAbstract {
             throw new IllegalStateException("Modelli di Gemini terminati");
         }
     }
-
-
 }

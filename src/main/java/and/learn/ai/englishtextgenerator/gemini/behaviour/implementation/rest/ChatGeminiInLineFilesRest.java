@@ -16,6 +16,10 @@ import static and.learn.ai.englishtextgenerator.EnglishTextGeneratorMain.*;
 
 public class ChatGeminiInLineFilesRest extends ChatGeminiRestAbstract {
 
+    public ChatGeminiInLineFilesRest(String apiKey) {
+        super(apiKey);
+    }
+
     /**
      * Chiama Gemini senza effettuare upload dei file
      */
@@ -67,21 +71,6 @@ public class ChatGeminiInLineFilesRest extends ChatGeminiRestAbstract {
         } catch (InterruptedException e) {
             throw new IOException("Chiamata verso Gemini in fase di upload file. Errore: " + e);
         }
-    }
-
-    @Override
-    public String sendMessageWithFilesUsingMemory(String promptText, byte[] file1, byte[] file2) throws IOException {
-        throw new RuntimeException("Metodo non implementato");
-    }
-
-    @Override
-    public String sendMessageUsingMemory(String promptText) throws IOException {
-        throw new RuntimeException("Metodo non implementato");
-    }
-
-    @Override
-    public String sendMessage(String promptText) throws IOException {
-        throw new RuntimeException("Metodo non implementato");
     }
 
     private void addInlineData(ArrayNode parts, byte[] data) {

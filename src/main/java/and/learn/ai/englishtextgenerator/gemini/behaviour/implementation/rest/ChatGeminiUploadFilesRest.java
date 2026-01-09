@@ -16,6 +16,10 @@ public class ChatGeminiUploadFilesRest extends ChatGeminiRestAbstract {
 
     public static final String URL_UPLOAD = "https://generativelanguage.googleapis.com/upload/v1beta/files?key=";
 
+    public ChatGeminiUploadFilesRest(String apiKey) {
+        super(apiKey);
+    }
+
     /**
      * Questo metodo effetua upload
      */
@@ -94,25 +98,13 @@ public class ChatGeminiUploadFilesRest extends ChatGeminiRestAbstract {
         }
     }
 
-    @Override
-    public String sendMessageWithFilesUsingMemory(String promptText, byte[] file1, byte[] file2) throws IOException {
-        throw new RuntimeException("Metodo non implementato");
-    }
 
-    @Override
-    public String sendMessageUsingMemory(String promptText) throws IOException {
-        throw new RuntimeException("Metodo non implementato");    }
-
-    @Override
-    public String sendMessage(String promptText) throws IOException {
-        throw new RuntimeException("Metodo non implementato");    }
-
-    private static String uploadPdf(HttpClient client, byte[] pdfBytes)
+    private String uploadPdf(HttpClient client, byte[] pdfBytes)
             throws IOException, InterruptedException {
 
         HttpRequest request = HttpRequest.newBuilder()
                 .uri(URI.create(
-                        URL_UPLOAD + API_KEY))
+                        URL_UPLOAD + apiKey))
                 .header("Content-Type", APPLICATION_PDF)
                 .header("X-Goog-Upload-Protocol", "raw")
                 .POST(HttpRequest.BodyPublishers.ofByteArray(pdfBytes))

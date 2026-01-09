@@ -1,23 +1,22 @@
 package and.learn.ai.englishtextgenerator.gemini.behaviour.abstraction;
 
 import com.google.genai.Client;
+import com.google.genai.errors.ClientException;
 import com.google.genai.types.*;
 
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
-import static and.learn.ai.englishtextgenerator.EnglishTextGeneratorMain.*;
-
 public abstract class ChatGeminiApiAbstract extends ChatGeminiAbstract {
 
-    protected final Client client;
+    protected Client client;
     protected List<Content> chatHistory;
     protected GenerateContentConfig config;
 
-    protected ChatGeminiApiAbstract() {
-        super();
-        client = Client.builder().apiKey(API_KEY).build();
+    protected ChatGeminiApiAbstract(String apiKey) {
+        super(apiKey);
+        client = Client.builder().apiKey(apiKey).build();
         chatHistory = new ArrayList<>();
         config = getGenerateContentConfig();
     }
@@ -56,7 +55,7 @@ public abstract class ChatGeminiApiAbstract extends ChatGeminiAbstract {
 
             return botResponseText;
 
-        } catch (Exception e) {
+        } catch (ClientException e) {
             // In caso di errore, rimuoviamo l'ultimo messaggio dell'utente
             // per evitare una storia sbilanciata (User senza risposta del Model)
             if (!chatHistory.isEmpty()) {
@@ -77,7 +76,7 @@ public abstract class ChatGeminiApiAbstract extends ChatGeminiAbstract {
     }
 
     @Override
-    public void setTemperature(float temperature){
+    public void setTemperature(float temperature) {
         super.setTemperature(temperature);
         config = getGenerateContentConfig();
     }
@@ -85,7 +84,8 @@ public abstract class ChatGeminiApiAbstract extends ChatGeminiAbstract {
     private GenerateContentConfig getGenerateContentConfig() {
         //imposto la capacità di pensare!
         ThinkingConfig thinking = ThinkingConfig.builder()
-                .includeThoughts(true)
+                .thinkingLevel(ThinkingLevel.Known.MEDIUM)
+                .includeThoughts(false)
                 .build();
 
         return GenerateContentConfig.builder()

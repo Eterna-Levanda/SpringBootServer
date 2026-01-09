@@ -1,12 +1,11 @@
 package and.learn.ai.englishtextgenerator.gemini.behaviour.abstraction;
 
-import static and.learn.ai.englishtextgenerator.EnglishTextGeneratorMain.API_KEY;
-
 public abstract class ChatGeminiRestAbstract extends ChatGeminiAbstract {
 
     protected static String urlApiGemini;
 
-    protected ChatGeminiRestAbstract() {
+    protected ChatGeminiRestAbstract(String apiKey) {
+        super(apiKey);
         createUrlApiGemini();
     }
 
@@ -16,9 +15,24 @@ public abstract class ChatGeminiRestAbstract extends ChatGeminiAbstract {
         createUrlApiGemini();
     }
 
+    @Override
+    public String sendMessageUsingMemory(String promptText) {
+        throw new RuntimeException("Metodo non implementato");
+    }
+
+    @Override
+    public String sendMessage(String promptText) {
+        throw new RuntimeException("Metodo non implementato");
+    }
+
+    @Override
+    public String sendMessageWithFilesUsingMemory(String promptText, byte[] file1, byte[] file2) {
+        throw new RuntimeException("Metodo non implementato");
+    }
+
     private void createUrlApiGemini() {
         urlApiGemini = "https://generativelanguage.googleapis.com/v1beta/models/"
                 + geminiModel + ":generateContent?key="
-                + API_KEY;
+                + apiKey;
     }
 }

@@ -7,20 +7,20 @@ import and.learn.ai.englishtextgenerator.gemini.behaviour.implementation.api.Cha
 import and.learn.ai.englishtextgenerator.gemini.behaviour.implementation.rest.ChatGeminiInLineFilesRest;
 import and.learn.ai.englishtextgenerator.gemini.behaviour.implementation.rest.ChatGeminiUploadFilesRest;
 
-public class ChatGeminiBehaviourSwitcher {
+public class ChatGeminiBehaviourCreator {
 
-    public static ChatGeminiAbstract getInstance(ChatGeminiBehaviour behaviour) {
+    public static ChatGeminiAbstract getInstance(ChatGeminiBehaviour behaviour, String apiKey) {
         ChatGeminiAbstract instance = null;
         if (behaviour == ChatGeminiBehaviour.UPLOAD_FILES_REST) {
-            instance = new ChatGeminiUploadFilesRest();
+            instance = new ChatGeminiUploadFilesRest(apiKey);
         } else if (behaviour == ChatGeminiBehaviour.INLINE_FILES_REST) {
-            instance = new ChatGeminiInLineFilesRest();
+            instance = new ChatGeminiInLineFilesRest(apiKey);
         } else if (behaviour == ChatGeminiBehaviour.INLINE_FILES_API) {
-            instance = new ChatGeminiInLineFilesApi();
+            instance = new ChatGeminiInLineFilesApi(apiKey);
         } else if (behaviour == ChatGeminiBehaviour.UPLOAD_FILES_API) {
-            instance = new ChatGeminiUploadFilesApi();
+            instance = new ChatGeminiUploadFilesApi(apiKey);
         } else if (behaviour == ChatGeminiBehaviour.FAKE_IMPLEMENTATION) {
-            instance = new ChatGeminiFakeGoogleApi();
+            instance = new ChatGeminiFakeGoogleApi(apiKey);
         }
 
         return instance;

@@ -7,13 +7,16 @@ import com.google.genai.types.Part;
 
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.LinkedList;
 import java.util.List;
 
 import static and.learn.ai.englishtextgenerator.EnglishTextGeneratorMain.APPLICATION_PDF;
 
 public class ChatGeminiInLineFilesApi extends ChatGeminiApiAbstract {
+
+    public ChatGeminiInLineFilesApi(String apiKey) {
+        super(apiKey);
+    }
 
     /**
      * Chiama Gemini senza effettuare upload dei file
