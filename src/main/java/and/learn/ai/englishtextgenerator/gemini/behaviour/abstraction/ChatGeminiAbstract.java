@@ -1,5 +1,6 @@
 package and.learn.ai.englishtextgenerator.gemini.behaviour.abstraction;
 
+import lombok.Getter;
 import lombok.Setter;
 
 import java.io.IOException;
@@ -8,12 +9,14 @@ import java.util.Arrays;
 import java.util.List;
 
 @Setter
+@Getter
 public abstract class ChatGeminiAbstract {
 
-    protected static String geminiModel = "gemini-3-flash-preview";
+    protected static String geminiModel;
 
     protected float temperature;
     protected String apiKey;
+    protected int totalTokens;
 
     private static final List<String> modelli = new ArrayList<>(Arrays.asList(
             "gemini-flash-latest",

@@ -53,6 +53,9 @@ public abstract class ChatGeminiApiAbstract extends ChatGeminiAbstract {
                     .build();
             chatHistory.add(modelResponse);
 
+            // 6. Conteggio quanti token ho consumato
+            totalTokens += response.usageMetadata().get().totalTokenCount().get();
+
             return botResponseText;
 
         } catch (ClientException e) {
@@ -72,6 +75,10 @@ public abstract class ChatGeminiApiAbstract extends ChatGeminiAbstract {
                 promptText,
                 config
         );
+
+        // Conteggio quanti token ho consumato
+        totalTokens += response.usageMetadata().get().totalTokenCount().get();
+
         return response.text();
     }
 

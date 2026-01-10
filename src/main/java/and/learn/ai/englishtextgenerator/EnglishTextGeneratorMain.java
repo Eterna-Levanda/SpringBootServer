@@ -1,10 +1,10 @@
 package and.learn.ai.englishtextgenerator;
 
-import and.learn.ai.englishtextgenerator.googleservice.DocsManager;
-import and.learn.ai.englishtextgenerator.googleservice.DriveManager;
 import and.learn.ai.englishtextgenerator.gemini.behaviour.ChatGeminiBehaviour;
 import and.learn.ai.englishtextgenerator.gemini.behaviour.ChatGeminiBehaviourCreator;
 import and.learn.ai.englishtextgenerator.gemini.behaviour.abstraction.ChatGeminiAbstract;
+import and.learn.ai.englishtextgenerator.googleservice.DocsManager;
+import and.learn.ai.englishtextgenerator.googleservice.DriveManager;
 import and.learn.ai.englishtextgenerator.googleservice.GoogleServicesFactory;
 import lombok.extern.log4j.Log4j2;
 import org.jspecify.annotations.NonNull;
@@ -26,7 +26,7 @@ public class EnglishTextGeneratorMain {
     // Parametri applicativi
     private static final String SEPARATORE_PROMPT = "PROMPT_2";
     private static final String PATH_PROPERTIES = "src/main/resources/ai/englishtextgenerator/config/secret.properties";
-    private static final String PATH_PROMPT_LOG = "src/main/resources/ai/englishtextgenerator/prompt_log";
+    private static final String PATH_LOG = "src/main/resources/ai/englishtextgenerator/log";
 
     //parametri che cambiano il comportamento dell'applicativo
     private static final int NUMERO_REGOLE_SINGOLA_RICHIESTA = 3;
@@ -43,14 +43,14 @@ public class EnglishTextGeneratorMain {
     private static final String DOC_ID_GERUND_INFINITIVE;
 
     // Prompt
-    private static final String FINAL_RECOMMENDATION = "Be sure the story you are working with continues to sound natural and the plot coherent and sensible. Even more important: the text must be understandable for a B2 student, do not use more complicated words. This is the story. ";
-    private static final String APPLY_RULES_PROMPT = "Where it sounds naturally, apply to the story the following grammar rules a couple of times. Doing this, do not modify sentences already changed, but add new short text. The rules are enclosed in square brackets. " + FINAL_RECOMMENDATION;
-    private static final String GERUND_INFINITIVE_PROMPT = "Read the document attached containing many examples of usage of verb in gerund or infinitive form. Choose 4 or 5 of them and apply them to the story changing slightly the needed sentences in a very natural way in order to have the story with a few of those verbs. " + FINAL_RECOMMENDATION;
-    private static final String SYNONYMS_PROMPT = "Read the document attached containing many words and their synonyms. Try to apply 7 or 8 of them to the story changing slightly the needed sentences in a very natural way, in order to have the story with a few of those synonyms. " + FINAL_RECOMMENDATION;
+    private static final String INITIAL_RECOMMENDATION = "Now, revise the previous story and apply the following instructions. Give me back the renewed story. ";
+    private static final String FINAL_RECOMMENDATION = "Be sure the story you are working with continues to sound natural and the plot coherent and sensible. Even more important: the text must be understandable for a B2 student, do not use more complicated words. ";
+    private static final String APPLY_RULES_PROMPT = INITIAL_RECOMMENDATION + "Where it sounds naturally, apply to the story in the middle of the text, the following grammar rules a couple of times. Doing this, do not modify sentences already changed, but add new short text. The rules are enclosed in square brackets. " + FINAL_RECOMMENDATION;
+    private static final String GERUND_INFINITIVE_PROMPT = INITIAL_RECOMMENDATION + "Read the document attached containing many examples of usage of verb in gerund or infinitive form. Choose 4 or 5 of them and apply them to the story in the middle of the text, changing slightly the needed sentences in a very natural way in order to have the story with a few of those verbs. " + FINAL_RECOMMENDATION;
+    private static final String SYNONYMS_PROMPT = INITIAL_RECOMMENDATION + "Read the document attached containing many words and their synonyms. Try to apply 7 or 8 of them to the story in the middle of the text, changing slightly the needed sentences in a very natural way, in order to have the story with a few of those synonyms. " + FINAL_RECOMMENDATION;
     private static final String LONGER_STORY_PROMPT = "Analize every paragraph of this story making it around 50 % longer, while continuing to apply the previously requested requirements. " + FINAL_RECOMMENDATION;
-    private static final String IMPROVE_STORY_PROMPT = "Read the following story in order to improve the readability, avoiding repetition and correcting very innatural sentences. Delete every sentence or comment that is not part of the story. This is the story. ";
+    private static final String IMPROVE_STORY_PROMPT = "Read the following story in order to improve the readability, avoiding repetition and correcting very innatural sentences. Delete every sentence or comment that is not part of the story. ";
     private static final String TRANSLATE_TEXT_PROMPT = "Translate the following text from English into Italian. Use a natural, conversational tone. Avoid literal translations. Don't add any your comment. This is the text. ";
-    //frase da non specificare per la traduzione: Adapt idiomatic expressions so that they sound as if they were spoken by a native Italian speaker in a real conversation
 
     // Stringhe maggiormente usate
     private static final String LINE_BREAK = "\n";
@@ -58,7 +58,7 @@ public class EnglishTextGeneratorMain {
 
     // Usato per creare file di log univoci
     private static int numFile = 0;
-
+    private static ChatGeminiAbstract clientChatGemini;
 
     static {
         //inizializzazione delle costanti tramite file di properties
@@ -82,8 +82,6 @@ public class EnglishTextGeneratorMain {
         DOC_ID_GERUND_INFINITIVE = map.get("docIdGerundInfinitive");
     }
 
-    private static ChatGeminiAbstract chatGemini;
-
     public static void main(String[] args) throws Exception {
 
         GoogleServicesFactory googleServicesFactory = new GoogleServicesFactory();
@@ -102,35 +100,39 @@ public class EnglishTextGeneratorMain {
         log("Documenti Drive scaricati con successo. Ora verrà generato il testo con Gemini.");
 
         // Creo il client Gemini
-        chatGemini = ChatGeminiBehaviourCreator.getInstance(ChatGeminiBehaviour.UPLOAD_FILES_API, API_KEY);
+        clientChatGemini = ChatGeminiBehaviourCreator.getInstance(ChatGeminiBehaviour.UPLOAD_FILES_API, API_KEY);
 
         String storia;
         //creo la storia
-        chatGemini.setTemperature(0.8f);
+        clientChatGemini.setTemperature(0.8f);
         storia = sendPromptWithFiles(promptIniziale, contentSinonimi, contentErroriFrequenti);
+        logSuFile(storia);
 
         log("Storia creata");
 
         //riscrivi la storia N volte aggiungendo ogni volta delle regole grammaticali
         List<List<String>> requirements = groupGrammarRules(elencoRequisitiGrammaticali);
-        chatGemini.setTemperature(0.5f);
+        clientChatGemini.setTemperature(0.5f);
         for (int i = 0; i < requirements.size(); i++) {
             log("Applico la serie di requisiti n. " + (i + 1) + " ovvero " + requirements.get(i));
             String promptRequisitiGrammaticali1 = requirements.get(i).toString();
-            storia = sendPromptWithFiles(APPLY_RULES_PROMPT + promptRequisitiGrammaticali1 + LINE_BREAK + storia, null, null);
+            storia = sendPromptWithFiles(APPLY_RULES_PROMPT + promptRequisitiGrammaticali1 /*+ LINE_BREAK + storia*/, null, null);
+            logSuFile(storia);
         }
 
         //applico gerundio/infinito
-        chatGemini.setTemperature(0.4f);
+        clientChatGemini.setTemperature(0.4f);
         for (int i = 0; i < 2; i++) {
             log("Applico gerundio/infinito per la " + (i + 1) + " volta");
-            storia = sendPromptWithFiles(GERUND_INFINITIVE_PROMPT + storia, contentGerundInfinitive, null);
+            storia = sendPromptWithFiles(GERUND_INFINITIVE_PROMPT, contentGerundInfinitive, null);
+            logSuFile(storia);
         }
 
         //di nuovo i sinonimi
         log("Aggiungo i sinonimi");
-        chatGemini.setTemperature(0.4f);
-        storia = sendPromptWithFiles(SYNONYMS_PROMPT + storia, contentSinonimi, null);
+        clientChatGemini.setTemperature(0.4f);
+        storia = sendPromptWithFiles(SYNONYMS_PROMPT, contentSinonimi, null);
+        logSuFile(storia);
 
         //allungo la storia
         /*log("Allungo la storia");
@@ -152,18 +154,11 @@ public class EnglishTextGeneratorMain {
         List<String> paragrafi = raggruppaRigheInParagrafiLunghiAlmenoNCaratteri(righeDellaStoria);
 
         log("Ora chiedo la traduzione dei paragrafi, in totale sono " + paragrafi.size());
-        chatGemini.setTemperature(0.3f);
-        String storiaTradottaDaStampare;
+        clientChatGemini.setTemperature(0.3f);
+        List<String> paragrafiTradotti = traduciParagrafi(paragrafi);
+        log("Numero di token richiesti per questa storia: " + clientChatGemini.getTotalTokens());
 
-        if(false){
-            //trasformo la lista di paragrafi nella singola storia, con i paragrafi separati da una linea vuota
-            storia = String.join(LINE_BREAK + LINE_BREAK, paragrafi);
-            storiaTradottaDaStampare = sendPromptWithFiles(TRANSLATE_TEXT_PROMPT + storia, null, null);
-        } else {
-            List<String> paragrafiTradotti = traduciParagrafi(paragrafi);
-            storiaTradottaDaStampare = stampa(paragrafiTradotti);
-        }
-
+        String storiaTradottaDaStampare = String.join(LINE_BREAK + LINE_BREAK, paragrafiTradotti);
         String storiaOriginaleDaStampare = String.join(LINE_BREAK + LINE_BREAK, paragrafi);
 
         log("Creazione del file su Drive contenente la storia creata");
@@ -265,24 +260,24 @@ public class EnglishTextGeneratorMain {
         String response;
         try {
             if (file1 != null || file2 != null) {
-                response = chatGemini.sendMessageWithFilesUsingMemory(prompt, file1, file2);
+                response = clientChatGemini.sendMessageWithFilesUsingMemory(prompt, file1, file2);
             } else {
-                response = chatGemini.sendMessageUsingMemory(prompt);
+                response = clientChatGemini.sendMessageUsingMemory(prompt);
             }
 
         } catch (IOException e) {
-                //ho esaurito i token di un modello gratuito, ora passo al successivo
-                chatGemini.changeModello();
+            //ho esaurito i token di un modello gratuito, ora passo al successivo
+            clientChatGemini.changeModello();
             response = sendPromptWithFiles(prompt, file1, file2);
         }
         return response;
 
     }
 
-    private static void logSuFile(String prompt) {
+    private static void logSuFile(String textToLog) {
 
         // Definiamo il percorso relativo
-        Path dirPath = Path.of(PATH_PROMPT_LOG);
+        Path dirPath = Path.of(PATH_LOG);
 
         try (Stream<Path> files = Files.walk(dirPath)) {
             // Se numFile è 0, svuota la cartella prima di iniziare
@@ -300,13 +295,13 @@ public class EnglishTextGeneratorMain {
             }
 
             numFile++;
-            String fileName = "Prompt_" + numFile + ".txt";
+            String fileName = "log_" + numFile + ".txt";
             Path filePath = dirPath.resolve(fileName);
 
             // 2. Scrive il file (sovrascrive se esiste, lo crea se manca)
-            Files.writeString(filePath, prompt, StandardOpenOption.CREATE, StandardOpenOption.TRUNCATE_EXISTING);
+            Files.writeString(filePath, textToLog, StandardOpenOption.CREATE, StandardOpenOption.TRUNCATE_EXISTING);
 
-            System.out.println("Log del prompt salvato con successo: " + filePath.toAbsolutePath());
+            System.out.println("Log salvato con successo: " + filePath.toAbsolutePath());
 
         } catch (IOException e) {
             System.err.println("Errore durante il salvataggio del log: " + e.getMessage());

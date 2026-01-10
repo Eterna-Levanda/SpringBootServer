@@ -45,6 +45,9 @@ public class ChatGeminiInLineFilesApi extends ChatGeminiApiAbstract {
                 config
         );
 
+        // Conteggio quanti token ho consumato
+        totalTokens += response.usageMetadata().get().totalTokenCount().get();
+
         return response.text();
     }
 

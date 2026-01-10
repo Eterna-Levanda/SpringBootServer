@@ -67,6 +67,9 @@ public class ChatGeminiUploadFilesApi extends ChatGeminiApiAbstract {
 
             chatHistory.add(modelContent);
 
+            // Conteggio quanti token ho consumato
+            totalTokens += response.usageMetadata().get().totalTokenCount().get();
+
             return modelResponseText;
 
         } catch (Exception e) {
