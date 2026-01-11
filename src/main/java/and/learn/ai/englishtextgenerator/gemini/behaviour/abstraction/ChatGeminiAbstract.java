@@ -19,17 +19,19 @@ public abstract class ChatGeminiAbstract {
     protected int totalTokens;
 
     private static final List<String> modelli = new ArrayList<>(Arrays.asList(
-            "gemini-flash-latest",
-            "gemini-2.5-flash-lite",// - usato alla grande ma non applica le regole!
-            "gemini-2.5-flash",// - usato alla grande
-            "gemini-3-flash-preview",// - usato alla grande
-            "gemini-3-flash", //mai provato
-            "gemini-2.0-flash-lite",// - alla prima richiesta ha fallito
-            "gemini-2.0-flash",// - alla prima richiesta ha fallito
-            "gemini-2.5-pro",// - alla prima richiesta ha fallito
-            "gemini-3-pro-preview",// - alla prima richiesta ha fallito
-            "gemini-1.5-flash",//da provare
-            "gemini-1.5-flash-pro"//da provare
+            "gemini-3-flash-preview",// USABILE con THINKING di livello MEDIUM
+            "gemini-3-pro-preview"// NON HA IL THINKING di livello MEDIUM
+           /*
+            "gemini-flash-latest",//NON HA IL THINKING!
+            "gemini-2.5-flash-lite",//NON HA IL THINKING!
+            "gemini-2.5-flash",//NON HA IL THINKING!
+            "gemini-3-flash", //gemini-3-flash is not found for API version v1beta
+            "gemini-2.0-flash-lite",//NON HA IL THINKING!
+            "gemini-2.0-flash",// NON HA IL THINKING!
+            "gemini-2.5-pro",// NON HA IL THINKING!
+            "gemini-1.5-flash",//is not found for API version v1beta
+            "gemini-1.5-flash-pro"//is not found for API version v1beta
+            */
     ));
 
     protected ChatGeminiAbstract(String apiKey) {

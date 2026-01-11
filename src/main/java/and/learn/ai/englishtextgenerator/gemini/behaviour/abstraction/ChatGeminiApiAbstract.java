@@ -91,7 +91,7 @@ public abstract class ChatGeminiApiAbstract extends ChatGeminiAbstract {
     private GenerateContentConfig getGenerateContentConfig() {
         //imposto la capacità di pensare!
         ThinkingConfig thinking = ThinkingConfig.builder()
-                .thinkingLevel(ThinkingLevel.Known.MEDIUM)
+                .thinkingLevel(ThinkingLevel.Known.LOW)
                 .includeThoughts(false)
                 .build();
 

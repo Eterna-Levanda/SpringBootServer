@@ -45,12 +45,11 @@ public class EnglishTextGeneratorMain {
     // Prompt
     private static final String INITIAL_RECOMMENDATION = "Now, revise the previous story and apply the following instructions. Give me back the renewed story. ";
     private static final String FINAL_RECOMMENDATION = "Be sure the story you are working with continues to sound natural and the plot coherent and sensible. Even more important: the text must be understandable for a B2 student, do not use more complicated words. ";
-    private static final String APPLY_RULES_PROMPT = INITIAL_RECOMMENDATION + "Where it sounds naturally, apply to the story in the middle of the text, the following grammar rules a couple of times. Doing this, do not modify sentences already changed, but add new short text. The rules are enclosed in square brackets. " + FINAL_RECOMMENDATION;
+    private static final String APPLY_RULES_PROMPT = INITIAL_RECOMMENDATION + "Where it sounds naturally in the middle of the text, apply to the story the following grammar rules a couple of times. Doing this, do not modify sentences already changed, but add new short text. " + FINAL_RECOMMENDATION;
     private static final String GERUND_INFINITIVE_PROMPT = INITIAL_RECOMMENDATION + "Read the document attached containing many examples of usage of verb in gerund or infinitive form. Choose 4 or 5 of them and apply them to the story in the middle of the text, changing slightly the needed sentences in a very natural way in order to have the story with a few of those verbs. " + FINAL_RECOMMENDATION;
     private static final String SYNONYMS_PROMPT = INITIAL_RECOMMENDATION + "Read the document attached containing many words and their synonyms. Try to apply 7 or 8 of them to the story in the middle of the text, changing slightly the needed sentences in a very natural way, in order to have the story with a few of those synonyms. " + FINAL_RECOMMENDATION;
-    private static final String LONGER_STORY_PROMPT = "Analize every paragraph of this story making it around 50 % longer, while continuing to apply the previously requested requirements. " + FINAL_RECOMMENDATION;
     private static final String IMPROVE_STORY_PROMPT = "Read the following story in order to improve the readability, avoiding repetition and correcting very innatural sentences. Delete every sentence or comment that is not part of the story. ";
-    private static final String TRANSLATE_TEXT_PROMPT = "Translate the following text from English into Italian. Use a natural, conversational tone. Avoid literal translations. Don't add any your comment. This is the text. ";
+    private static final String TRANSLATE_TEXT_PROMPT = "Translate the following text from English into Italian. Use a natural, conversational tone. Don't add any your comment. This is the text. ";
 
     // Stringhe maggiormente usate
     private static final String LINE_BREAK = "\n";
@@ -110,13 +109,18 @@ public class EnglishTextGeneratorMain {
 
         log("Storia creata");
 
-        //riscrivi la storia N volte aggiungendo ogni volta delle regole grammaticali
+        // Aggiunge nella storia requisiti grammaticali a gruppi di N (NUMERO_REGOLE_SINGOLA_RICHIESTA) alla volta
         List<List<String>> requirements = groupGrammarRules(elencoRequisitiGrammaticali);
         clientChatGemini.setTemperature(0.5f);
         for (int i = 0; i < requirements.size(); i++) {
             log("Applico la serie di requisiti n. " + (i + 1) + " ovvero " + requirements.get(i));
-            String promptRequisitiGrammaticali1 = requirements.get(i).toString();
-            storia = sendPromptWithFiles(APPLY_RULES_PROMPT + promptRequisitiGrammaticali1 /*+ LINE_BREAK + storia*/, null, null);
+            String promptRequisitiGrammaticali = "";
+
+            for (int j = 0; j < requirements.get(i).size(); j++) {
+                promptRequisitiGrammaticali += " Requirement n. " + (j+1) + ": " + requirements.get(i).get(j) + ", ";
+            }
+
+            storia = sendPromptWithFiles(APPLY_RULES_PROMPT + promptRequisitiGrammaticali, null, null);
             logSuFile(storia);
         }
 
@@ -134,14 +138,9 @@ public class EnglishTextGeneratorMain {
         storia = sendPromptWithFiles(SYNONYMS_PROMPT, contentSinonimi, null);
         logSuFile(storia);
 
-        //allungo la storia
-        /*log("Allungo la storia");
-        chatGemini.setTemperature(0.5f);
-        storia = sendPromptWithFiles(LONGER_STORY_PROMPT + storia, null, null);
-
         //miglioro la storia
-        log("Miglioro la storia");
-        chatGemini.setTemperature(0.3f);
+        /*log("Miglioro la storia");
+        clientChatGemini.setTemperature(0.3f);
         storia = sendPromptWithFiles(IMPROVE_STORY_PROMPT + storia, null, null);*/
 
         // storia = setStoria();
