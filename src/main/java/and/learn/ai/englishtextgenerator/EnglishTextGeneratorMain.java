@@ -44,10 +44,10 @@ public class EnglishTextGeneratorMain {
 
     // Prompt
     private static final String INITIAL_RECOMMENDATION = "Now, revise the previous story and apply the following instructions. Give me back the renewed story. ";
-    private static final String FINAL_RECOMMENDATION = "Be sure the story you are working with continues to sound natural and the plot coherent and sensible. Even more important: the text must be understandable for a B2 student, do not use more complicated words. ";
-    private static final String APPLY_RULES_PROMPT = INITIAL_RECOMMENDATION + "Where it sounds naturally in the middle of the text, apply to the story the following grammar rules a couple of times. Doing this, do not modify sentences already changed, but add new short text. " + FINAL_RECOMMENDATION;
-    private static final String GERUND_INFINITIVE_PROMPT = INITIAL_RECOMMENDATION + "Read the document attached containing many examples of usage of verb in gerund or infinitive form. Choose 4 or 5 of them and apply them to the story in the middle of the text, changing slightly the needed sentences in a very natural way in order to have the story with a few of those verbs. " + FINAL_RECOMMENDATION;
-    private static final String SYNONYMS_PROMPT = INITIAL_RECOMMENDATION + "Read the document attached containing many words and their synonyms. Try to apply 7 or 8 of them to the story in the middle of the text, changing slightly the needed sentences in a very natural way, in order to have the story with a few of those synonyms. " + FINAL_RECOMMENDATION;
+    private static final String FINAL_RECOMMENDATION = "Doing this, do not modify sentences already changed, but add new short text. Be sure the story continues to sound natural and the plot is coherent and sensible. Even more important: the text must be utterly understandable for a B2 student, do not use more complicated words. ";
+    private static final String APPLY_RULES_PROMPT = INITIAL_RECOMMENDATION + "Where it sounds naturally, apply to the story the following grammar rules a couple of times. " + FINAL_RECOMMENDATION;
+    private static final String GERUND_INFINITIVE_PROMPT = INITIAL_RECOMMENDATION + "Read the document attached containing many examples of usage of verb in gerund or infinitive form. Choose 4 or 5 of them and apply them to the story. " + FINAL_RECOMMENDATION;
+    private static final String SYNONYMS_PROMPT = INITIAL_RECOMMENDATION + "Read the document attached containing many words and their synonyms. Try to apply 7 or 8 of them to the story. " + FINAL_RECOMMENDATION;
     private static final String IMPROVE_STORY_PROMPT = "Read the following story in order to improve the readability, avoiding repetition and correcting very innatural sentences. Delete every sentence or comment that is not part of the story. ";
     private static final String TRANSLATE_TEXT_PROMPT = "Translate the following text from English into Italian. Use a natural, conversational tone. Don't add any your comment. This is the text. ";
 
@@ -111,6 +111,8 @@ public class EnglishTextGeneratorMain {
 
         // Aggiunge nella storia requisiti grammaticali a gruppi di N (NUMERO_REGOLE_SINGOLA_RICHIESTA) alla volta
         List<List<String>> requirements = groupGrammarRules(elencoRequisitiGrammaticali);
+        //ordine casuale nei requisiti
+        Collections.shuffle(requirements);
         clientChatGemini.setTemperature(0.5f);
         for (int i = 0; i < requirements.size(); i++) {
             log("Applico la serie di requisiti n. " + (i + 1) + " ovvero " + requirements.get(i));
@@ -126,7 +128,7 @@ public class EnglishTextGeneratorMain {
 
         //applico gerundio/infinito
         clientChatGemini.setTemperature(0.4f);
-        for (int i = 0; i < 2; i++) {
+        for (int i = 0; i < 1; i++) {
             log("Applico gerundio/infinito per la " + (i + 1) + " volta");
             storia = sendPromptWithFiles(GERUND_INFINITIVE_PROMPT, contentGerundInfinitive, null);
             logSuFile(storia);
