@@ -19,7 +19,7 @@ public abstract class ChatGeminiAbstract {
     protected int totalTokens;
 
     private static final List<String> modelli = new ArrayList<>(Arrays.asList(
-            "gemini-3-flash-preview",// USABILE con THINKING di livello MEDIUM
+            "gemini-3-flash-preview",// USABILE con THINKING di livello MEDIUM e HIGH
             "gemini-3-pro-preview"// NON HA IL THINKING di livello MEDIUM
            /*
             "gemini-flash-latest",//NON HA IL THINKING!

@@ -48,7 +48,6 @@ public class EnglishTextGeneratorMain {
     private static final String APPLY_RULES_PROMPT = INITIAL_RECOMMENDATION + "Where it sounds naturally, apply to the story the following grammar rules a couple of times. " + FINAL_RECOMMENDATION;
     private static final String GERUND_INFINITIVE_PROMPT = INITIAL_RECOMMENDATION + "Read the document attached containing many examples of usage of verb in gerund or infinitive form. Choose 4 or 5 of them and apply them to the story. " + FINAL_RECOMMENDATION;
     private static final String SYNONYMS_PROMPT = INITIAL_RECOMMENDATION + "Read the document attached containing many words and their synonyms. Try to apply 7 or 8 of them to the story. " + FINAL_RECOMMENDATION;
-    private static final String IMPROVE_STORY_PROMPT = "Read the following story in order to improve the readability, avoiding repetition and correcting very innatural sentences. Delete every sentence or comment that is not part of the story. ";
     private static final String TRANSLATE_TEXT_PROMPT = "Translate the following text from English into Italian. Use a natural, conversational tone. Don't add any your comment. This is the text. ";
 
     // Stringhe maggiormente usate
@@ -140,13 +139,6 @@ public class EnglishTextGeneratorMain {
         storia = sendPromptWithFiles(SYNONYMS_PROMPT, contentSinonimi, null);
         logSuFile(storia);
 
-        //miglioro la storia
-        /*log("Miglioro la storia");
-        clientChatGemini.setTemperature(0.3f);
-        storia = sendPromptWithFiles(IMPROVE_STORY_PROMPT + storia, null, null);*/
-
-        // storia = setStoria();
-
         //estraggo il titolo e lo rimuovo dalla storia
         List<String> righeDellaStoria = suddividiRighe(storia);
         String titolo = righeDellaStoria.remove(0);
@@ -222,20 +214,6 @@ public class EnglishTextGeneratorMain {
 
     private static void log(String s) {
         System.out.println(s);
-    }
-
-    private static void log(List l) {
-        for (int i = 0; i < l.size(); i++) {
-            log("Elemento n." + (i + 1) + "\n" + l.get(i));
-        }
-    }
-
-    private static String stampa(List<String> paragrafi) {
-        StringBuilder storia = new StringBuilder();
-        paragrafi.forEach(paragrafo -> {
-            storia.append(paragrafo).append(LINE_BREAK).append(LINE_BREAK);
-        });
-        return storia.toString();
     }
 
     private static List<String> traduciParagrafi(final List<String> paragrafi) throws IOException {
