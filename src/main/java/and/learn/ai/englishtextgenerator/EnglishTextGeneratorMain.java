@@ -29,7 +29,7 @@ public class EnglishTextGeneratorMain {
     private static final String PATH_LOG = "src/main/resources/ai/englishtextgenerator/log";
 
     //parametri che cambiano il comportamento dell'applicativo
-    private static final int NUMERO_REGOLE_SINGOLA_RICHIESTA = 3;
+    private static final int NUMERO_REGOLE_SINGOLA_RICHIESTA = 2;
     private static final int NUM_CARATTERI_PER_SINGOLO_PARAGRAFO = 600;
 
     // Costanti valorizzate a runtime

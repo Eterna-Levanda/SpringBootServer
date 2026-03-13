@@ -17,20 +17,22 @@ public abstract class ChatGeminiAbstract {
     protected float temperature;
     protected String apiKey;
     protected int totalTokens;
+    /*
+       gemini-pro-latest to gemini-3-pro-preview
+        gemini-flash-latest to gemini-3-flash-preview
+ */
 
     private static final List<String> modelli = new ArrayList<>(Arrays.asList(
-            "gemini-3-flash-preview",// USABILE con THINKING di livello MEDIUM e HIGH
-            "gemini-3-pro-preview"// NON HA IL THINKING di livello MEDIUM
-           /*
+
+            "gemini-3-flash-preview"// USABILE con THINKING di livello MEDIUM e HIGH
+            //"gemini-3.1-pro-preview",// NON HA IL THINKING di livello MEDIUM
+
+            /*
             "gemini-flash-latest",//NON HA IL THINKING!
             "gemini-2.5-flash-lite",//NON HA IL THINKING!
             "gemini-2.5-flash",//NON HA IL THINKING!
             "gemini-3-flash", //gemini-3-flash is not found for API version v1beta
-            "gemini-2.0-flash-lite",//NON HA IL THINKING!
-            "gemini-2.0-flash",// NON HA IL THINKING!
             "gemini-2.5-pro",// NON HA IL THINKING!
-            "gemini-1.5-flash",//is not found for API version v1beta
-            "gemini-1.5-flash-pro"//is not found for API version v1beta
             */
     ));
 
