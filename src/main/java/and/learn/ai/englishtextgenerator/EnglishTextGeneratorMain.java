@@ -72,7 +72,7 @@ public class EnglishTextGeneratorMain {
             map.put(name, props.getProperty(name));
         }
 
-        API_KEY = map.get("apiKey");
+        API_KEY = Optional.ofNullable(System.getenv("apiKeyEnglishTextGenerator")).orElse(map.get("apiKey"));
         DOC_ID_MAIN_PROMPT = map.get("docIdPrompt");
         DOC_ID_ERRORI_FREQUENTI = map.get("docIdErroriFrequenti");
         DOC_ID_SINONIMI = map.get("docIdSinonimi");
