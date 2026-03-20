@@ -1,5 +1,6 @@
 package and.learn.ai.englishtextgenerator.googleservice;
 
+import and.learn.ai.englishtextgenerator.EnglishTextGeneratorMain;
 import com.google.api.services.docs.v1.DocsScopes;
 import com.google.api.services.drive.DriveScopes;
 import com.google.auth.oauth2.GoogleCredentials;
@@ -15,6 +16,7 @@ import java.util.List;
 public class GoogleServicesFactory {
 
     public static final String SERVICE_ACCOUNT_FILE = "src/main/resources/ai/englishtextgenerator/config/service-account.json";
+    public static final String SERVICE_ACCOUNT_FILE_GCLOUD = "/secret/service-account.json";
 
     private final DriveManager driveManager;
     private final DocsManager docsManager;
@@ -28,8 +30,9 @@ public class GoogleServicesFactory {
                 DocsScopes.DOCUMENTS    // Permessi per Docs
         );
 
-        // 2. Carichiamo le credenziali una volta sola
-        GoogleCredentials credentials = GoogleCredentials.fromStream(new FileInputStream(SERVICE_ACCOUNT_FILE))
+        // 2. Carichiamo le credenziali una volta sola, scegliendo dinamicamente il file in base all'ambiente di esecuzione (locale o GCloud)
+        String pathToServiceAccount = EnglishTextGeneratorMain.GOOGLE_CLOUD_ENABLED ? SERVICE_ACCOUNT_FILE_GCLOUD : SERVICE_ACCOUNT_FILE;
+        GoogleCredentials credentials = GoogleCredentials.fromStream(new FileInputStream(pathToServiceAccount))
                 .createScoped(ALL_SCOPES);
 
         // 3. Istanzio i service
