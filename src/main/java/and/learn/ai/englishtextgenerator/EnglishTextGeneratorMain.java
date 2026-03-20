@@ -6,6 +6,7 @@ import and.learn.ai.englishtextgenerator.gemini.behaviour.abstraction.ChatGemini
 import and.learn.ai.englishtextgenerator.googleservice.DocsManager;
 import and.learn.ai.englishtextgenerator.googleservice.DriveManager;
 import and.learn.ai.englishtextgenerator.googleservice.GoogleServicesFactory;
+import io.micrometer.common.util.StringUtils;
 import lombok.extern.log4j.Log4j2;
 import org.jspecify.annotations.NonNull;
 
@@ -32,15 +33,15 @@ public class EnglishTextGeneratorMain {
     private static final int NUMERO_REGOLE_SINGOLA_RICHIESTA = 2;
     private static final int NUM_CARATTERI_PER_SINGOLO_PARAGRAFO = 600;
 
-    // Costanti valorizzate a runtime
+    // Costanti valorizzate a runtime con valori sensibili come chiavi API o ID di documenti Drive
     // Caricamento della chiave API e del Service Account
-    private static final String API_KEY;
+    private static final String API_KEY_VALUE;
     // ID dei tuoi Google Docs
-    private static final String DOC_ID_MAIN_PROMPT;
-    private static final String DOC_ID_ERRORI_FREQUENTI;
-    private static final String DOC_ID_SINONIMI;
-    private static final String DOC_ID_STORIA_CREATA;
-    private static final String DOC_ID_GERUND_INFINITIVE;
+    private static final String DOC_ID_MAIN_PROMPT_VALUE;
+    private static final String DOC_ID_ERRORI_FREQUENTI_VALUE;
+    private static final String DOC_ID_SINONIMI_VALUE;
+    private static final String DOC_ID_STORIA_CREATA_VALUE;
+    private static final String DOC_ID_GERUND_INFINITIVE_VALUE;
 
     // Prompt
     private static final String INITIAL_RECOMMENDATION = "Now, revise the previous story and apply the following instructions. Give me back the renewed story. ";
@@ -58,13 +59,29 @@ public class EnglishTextGeneratorMain {
     private static int numFile = 0;
     private static ChatGeminiAbstract clientChatGemini;
 
+    //vale true se l'app viene eseguita su Google Cloud
+    public static final boolean GOOGLE_CLOUD_ENABLED = StringUtils.isNotEmpty(System.getenv("google_cloud"));
+
+    //variabili utilizzate solo per configurazione tramite variabili d'ambiente come in Google Cloud Run
+    private static final String ENGLISH_TEXT_GENERATOR = "EnglishTextGenerator.";
+    private static final String API_KEY = "apiKey";
+    private static final String DOC_ID_PROMPT = "docIdPrompt";
+    private static final String DOC_ID_ERRORI_FREQUENTI = "docIdErroriFrequenti";
+    private static final String DOC_ID_SINONIMI = "docIdSinonimi";
+    private static final String DOC_ID_STORIA_CREATA = "docIdStoriaCreata";
+    private static final String DOC_ID_GERUND_INFINITIVE = "docIdGerundInfinitive";
+
     static {
         //inizializzazione delle costanti tramite file di properties
         Properties props = new Properties();
-        try (InputStream is = Files.newInputStream(Path.of(PATH_PROPERTIES))) {
-            props.load(is);
-        } catch (IOException e) {
-            throw new RuntimeException(e);
+
+        //se non sono su Google Cloud, leggo le properties da file, altrimenti mi aspetto che siano tutte valorizzate da variabili d'ambiente
+        if(!GOOGLE_CLOUD_ENABLED) {
+            try (InputStream is = Files.newInputStream(Path.of(PATH_PROPERTIES))) {
+                props.load(is);
+            } catch (IOException e) {
+                throw new RuntimeException(e);
+            }
         }
 
         Map<String, String> map = new HashMap<>();
@@ -72,12 +89,13 @@ public class EnglishTextGeneratorMain {
             map.put(name, props.getProperty(name));
         }
 
-        API_KEY = Optional.ofNullable(System.getenv("apiKeyEnglishTextGenerator")).orElse(map.get("apiKey"));
-        DOC_ID_MAIN_PROMPT = map.get("docIdPrompt");
-        DOC_ID_ERRORI_FREQUENTI = map.get("docIdErroriFrequenti");
-        DOC_ID_SINONIMI = map.get("docIdSinonimi");
-        DOC_ID_STORIA_CREATA = map.get("docIdStoriaCreata");
-        DOC_ID_GERUND_INFINITIVE = map.get("docIdGerundInfinitive");
+        //lettura delle costanti da variabili d'ambiente (se presenti) o da file di properties
+        API_KEY_VALUE = Optional.ofNullable(System.getenv(ENGLISH_TEXT_GENERATOR + API_KEY)).orElse(map.get(API_KEY));
+        DOC_ID_MAIN_PROMPT_VALUE = Optional.ofNullable(System.getenv(ENGLISH_TEXT_GENERATOR + DOC_ID_PROMPT)).orElse(map.get(DOC_ID_PROMPT));
+        DOC_ID_ERRORI_FREQUENTI_VALUE = Optional.ofNullable(System.getenv(ENGLISH_TEXT_GENERATOR + DOC_ID_ERRORI_FREQUENTI)).orElse(map.get(DOC_ID_ERRORI_FREQUENTI));
+        DOC_ID_SINONIMI_VALUE = Optional.ofNullable(System.getenv(ENGLISH_TEXT_GENERATOR + DOC_ID_SINONIMI)).orElse(map.get(DOC_ID_SINONIMI));
+        DOC_ID_STORIA_CREATA_VALUE = Optional.ofNullable(System.getenv(ENGLISH_TEXT_GENERATOR + DOC_ID_STORIA_CREATA)).orElse(map.get(DOC_ID_STORIA_CREATA));
+        DOC_ID_GERUND_INFINITIVE_VALUE = Optional.ofNullable(System.getenv(ENGLISH_TEXT_GENERATOR + DOC_ID_GERUND_INFINITIVE)).orElse(map.get(DOC_ID_GERUND_INFINITIVE));
     }
 
     public static void main(String[] args) throws Exception {
@@ -86,19 +104,19 @@ public class EnglishTextGeneratorMain {
         DriveManager driveManager = googleServicesFactory.getDriveManager();
 
         // Lettura dei documenti Drive
-        String filePrompts = driveManager.extractNativeDocText(DOC_ID_MAIN_PROMPT);
+        String filePrompts = driveManager.extractNativeDocText(DOC_ID_MAIN_PROMPT_VALUE);
         PromptForGenerateText coppiaDiPrompt = splitByString(filePrompts);
         String promptIniziale = coppiaDiPrompt.firstPrompt();
         String elencoRequisitiGrammaticali = coppiaDiPrompt.secondPrompt();
 
-        byte[] contentSinonimi = driveManager.exportNativeDoc(DOC_ID_SINONIMI);
-        byte[] contentErroriFrequenti = driveManager.exportNativeDoc(DOC_ID_ERRORI_FREQUENTI);
-        byte[] contentGerundInfinitive = driveManager.exportNativeDoc(DOC_ID_GERUND_INFINITIVE);
+        byte[] contentSinonimi = driveManager.exportNativeDoc(DOC_ID_SINONIMI_VALUE);
+        byte[] contentErroriFrequenti = driveManager.exportNativeDoc(DOC_ID_ERRORI_FREQUENTI_VALUE);
+        byte[] contentGerundInfinitive = driveManager.exportNativeDoc(DOC_ID_GERUND_INFINITIVE_VALUE);
 
         log("Documenti Drive scaricati con successo. Ora verrà generato il testo con Gemini.");
 
         // Creo il client Gemini
-        clientChatGemini = ChatGeminiBehaviourCreator.getInstance(ChatGeminiBehaviour.UPLOAD_FILES_API, API_KEY);
+        clientChatGemini = ChatGeminiBehaviourCreator.getInstance(ChatGeminiBehaviour.UPLOAD_FILES_API, API_KEY_VALUE);
 
         String storia;
         //creo la storia
@@ -156,7 +174,7 @@ public class EnglishTextGeneratorMain {
 
         log("Creazione del file su Drive contenente la storia creata");
         DocsManager docsManager = googleServicesFactory.getDocsManager();
-        docsManager.appendToDocument(DOC_ID_STORIA_CREATA, titolo + LINE_BREAK + LINE_BREAK + storiaTradottaDaStampare + SERIE_DI_LINE_BREAK + titolo + LINE_BREAK + LINE_BREAK + storiaOriginaleDaStampare);
+        docsManager.appendToDocument(DOC_ID_STORIA_CREATA_VALUE, titolo + LINE_BREAK + LINE_BREAK + storiaTradottaDaStampare + SERIE_DI_LINE_BREAK + titolo + LINE_BREAK + LINE_BREAK + storiaOriginaleDaStampare);
 
         log("File creato correttamente sul Drive!");
     }
@@ -255,6 +273,10 @@ public class EnglishTextGeneratorMain {
 
     private static void logSuFile(String textToLog) {
 
+        if(GOOGLE_CLOUD_ENABLED){
+            log("L'applicativo è in esecuzione su Google Cloud, i file di log non vengono salvati localmente");
+            return;
+        }
         // Definiamo il percorso relativo
         Path dirPath = Path.of(PATH_LOG);
 
