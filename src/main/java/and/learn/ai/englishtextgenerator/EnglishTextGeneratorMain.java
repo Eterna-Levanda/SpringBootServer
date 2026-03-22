@@ -72,6 +72,7 @@ public class EnglishTextGeneratorMain {
     private static final String DOC_ID_GERUND_INFINITIVE = "docIdGerundInfinitive";
 
     static {
+        System.out.println("Avvio EnglishTextGeneratorMain");
         //inizializzazione delle costanti tramite file di properties
         Properties props = new Properties();
 
