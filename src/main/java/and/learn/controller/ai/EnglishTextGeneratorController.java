@@ -16,11 +16,26 @@ public class EnglishTextGeneratorController {
         return """
                 <!DOCTYPE html>
                 <html>
+                <head>
+                    <title>English Text Generator</title>
+                </head>
                 <body>
                     <h2>English Text Generator</h2>
-                    <form action="/englishTextGenerator/creaStoria" method="GET">
+                    <form id="btnCrea" action="/englishTextGenerator/creaStoria" method="GET" onsubmit="mostraMessaggio()">
                         <button type="submit">Crea storia</button>
                     </form>
+                    
+                    <p id="messaggioStato" style="margin-top: 15px; color: blue; font-weight: bold; font-family: Arial, sans-serif;"></p>
+                    
+                    <script>
+                            function mostraMessaggio() {
+                                // Inserisce il testo nel paragrafo
+                                document.getElementById("messaggioStato").innerText = "Generazione storia avviata...";
+                
+                                // Opzionale: disabilita il pulsante per evitare doppi click
+                                document.getElementById("btnCrea").disabled = true;
+                            }
+                        </script>
                 </body>
                 </html>
                 """;
@@ -31,15 +46,9 @@ public class EnglishTextGeneratorController {
        http://localhost:8080/englishTextGenerator/creaStoria
      * */
     @GetMapping("/creaStoria")
-    public String creaStoria() {
-        Thread t = new Thread(() -> {
-            try {
-                EnglishTextGeneratorMain.main(null);
-            } catch (Exception e) {
-                throw new RuntimeException(e);
-            }
-        });
-        t.start();
-        return "Storia in corso di generazione";
+    public String creaStoria() throws Exception {
+
+        EnglishTextGeneratorMain.main(null);
+        return "Storia generata con successo! Controlla su Google Drive per vedere il risultato.";
     }
 }
