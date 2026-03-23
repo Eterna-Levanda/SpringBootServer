@@ -275,7 +275,6 @@ public class EnglishTextGeneratorMain {
     private static void logSuFile(String textToLog) {
 
         if(GOOGLE_CLOUD_ENABLED){
-            log("L'applicativo è in esecuzione su Google Cloud, i file di log non vengono salvati localmente");
             return;
         }
         // Definiamo il percorso relativo
