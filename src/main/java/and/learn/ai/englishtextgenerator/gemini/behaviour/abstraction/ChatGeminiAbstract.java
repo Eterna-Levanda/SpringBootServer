@@ -40,7 +40,7 @@ public abstract class ChatGeminiAbstract {
     protected ChatGeminiAbstract(String apiKey) {
         this.apiKey = apiKey;
         temperature = 1;
-        geminiModel = modelli.remove(0);
+        geminiModel = modelli.get(0);
         System.out.println("Primo modello di Gemini: " + geminiModel);
     }
 
@@ -53,8 +53,9 @@ public abstract class ChatGeminiAbstract {
     public abstract String sendMessageWithFilesUsingMemory(String promptText, byte[] file1, byte[] file2) throws IOException;
 
     public void changeModello() {
-        if(!modelli.isEmpty()){
-            geminiModel = modelli.remove(0);
+        if(modelli.size() > 1) {
+            modelli.remove(0);
+            geminiModel = modelli.get(0);
             System.out.println("Cambio modello di Gemini. Ora si usa " + geminiModel);
         } else {
             throw new IllegalStateException("Modelli di Gemini terminati");
