@@ -60,7 +60,7 @@ public class EnglishTextGeneratorService {
     private final ConfigVariables configVariables;
 
     public EnglishTextGeneratorService() {
-        log.info("Avvio EnglishTextGeneratorMain");
+        log.info("Avvio EnglishTextGeneratorService");
         //inizializzazione delle costanti tramite file di properties
         Properties props = new Properties();
 
@@ -100,7 +100,7 @@ public class EnglishTextGeneratorService {
         String sessionID = UUID.randomUUID().toString();
 
         // Creo il client Gemini, usando un'implementazione specifica predefinita
-        final ChatGeminiAbstract clientChatGemini = ChatGeminiBehaviourCreator.getInstance(ChatGeminiBehaviour.FAKE_IMPLEMENTATION/*UPLOAD_FILES_API*/, configVariables.apiKey());
+        final ChatGeminiAbstract clientChatGemini = ChatGeminiBehaviourCreator.getInstance(ChatGeminiBehaviour.UPLOAD_FILES_API, configVariables.apiKey());
 
         //istanzio le classi per interfacciarmi con Google Drive e Docs
         GoogleServicesFactory googleServicesFactory = new GoogleServicesFactory();
