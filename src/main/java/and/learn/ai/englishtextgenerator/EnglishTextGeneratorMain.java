@@ -104,19 +104,21 @@ public class EnglishTextGeneratorMain {
         GoogleServicesFactory googleServicesFactory = new GoogleServicesFactory();
         DriveManager driveManager = googleServicesFactory.getDriveManager();
 
-        // Lettura dei documenti Drive
+        // Lettura dei documenti da Google Drive
+        // File n.1 i prompt per la creazione della storia in formato Stringa
         String filePrompts = driveManager.extractNativeDocText(DOC_ID_MAIN_PROMPT_VALUE);
         PromptForGenerateText coppiaDiPrompt = splitByString(filePrompts);
         String promptIniziale = coppiaDiPrompt.firstPrompt();
         String elencoRequisitiGrammaticali = coppiaDiPrompt.secondPrompt();
 
+        //Serie di file da Google Drive scaricati come array di byte, per usarli poi come allegati ai prompt
         byte[] contentSinonimi = driveManager.exportNativeDoc(DOC_ID_SINONIMI_VALUE);
         byte[] contentErroriFrequenti = driveManager.exportNativeDoc(DOC_ID_ERRORI_FREQUENTI_VALUE);
         byte[] contentGerundInfinitive = driveManager.exportNativeDoc(DOC_ID_GERUND_INFINITIVE_VALUE);
 
         log("Documenti Drive scaricati con successo. Ora verrà generato il testo con Gemini.");
 
-        // Creo il client Gemini
+        // Creo il client Gemini, usando un'implementazione specifica predefinita
         clientChatGemini = ChatGeminiBehaviourCreator.getInstance(ChatGeminiBehaviour.UPLOAD_FILES_API, API_KEY_VALUE);
 
         String storia;
@@ -127,32 +129,36 @@ public class EnglishTextGeneratorMain {
 
         log("Storia creata");
 
-        // Aggiunge nella storia requisiti grammaticali a gruppi di N (NUMERO_REGOLE_SINGOLA_RICHIESTA) alla volta
+        // Modifica la storia, aggiungendo frasi aventi i requisiti grammaticali richiesti, raggruppandoli in gruppi di N (NUMERO_REGOLE_SINGOLA_RICHIESTA) alla volta
         List<List<String>> requirements = groupGrammarRules(elencoRequisitiGrammaticali);
         //ordine casuale nei requisiti
         Collections.shuffle(requirements);
         clientChatGemini.setTemperature(0.5f);
+
+
         for (int i = 0; i < requirements.size(); i++) {
             log("Applico la serie di requisiti n. " + (i + 1) + " ovvero " + requirements.get(i));
             String promptRequisitiGrammaticali = "";
 
+            //costruisco un prompt in cui ogni singola regola è separata dalle altre, per meglio esplicitarle
             for (int j = 0; j < requirements.get(i).size(); j++) {
                 promptRequisitiGrammaticali += " Requirement n. " + (j+1) + ": " + requirements.get(i).get(j) + ", ";
             }
 
+            //modifico la storia applicando i requisiti grammaticali richiesti
             storia = sendPromptWithFiles(APPLY_RULES_PROMPT + promptRequisitiGrammaticali, null, null);
             logSuFile(storia);
         }
 
-        //applico gerundio/infinito
+        //modifico nuovamente la storia per applicare regole relative al gerundio/infinito
         clientChatGemini.setTemperature(0.4f);
         for (int i = 0; i < 1; i++) {
-            log("Applico gerundio/infinito per la " + (i + 1) + " volta");
+            log("Applico la regola di gerundio/infinito per la " + (i + 1) + " volta");
             storia = sendPromptWithFiles(GERUND_INFINITIVE_PROMPT, contentGerundInfinitive, null);
             logSuFile(storia);
         }
 
-        //di nuovo i sinonimi
+        //modifico nuovamente la storia per lavorare di nuovo sui sinonimi
         log("Aggiungo i sinonimi");
         clientChatGemini.setTemperature(0.4f);
         storia = sendPromptWithFiles(SYNONYMS_PROMPT, contentSinonimi, null);
