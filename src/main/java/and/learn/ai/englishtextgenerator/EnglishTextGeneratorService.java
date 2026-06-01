@@ -60,7 +60,7 @@ public class EnglishTextGeneratorService {
     private final ConfigVariables configVariables;
 
     public EnglishTextGeneratorService() {
-        log.info("Avvio EnglishTextGeneratorService");
+        log.info("Avvio EnglishTextGeneratorService ");
         //inizializzazione delle costanti tramite file di properties
         Properties props = new Properties();
 
