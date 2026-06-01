@@ -1,14 +1,18 @@
 package and.learn.controller.ai;
 
 import and.learn.ai.englishtextgenerator.EnglishTextGeneratorMain;
+import and.learn.ai.englishtextgenerator.EnglishTextGeneratorService;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 @RestController()
 @RequestMapping("englishTextGenerator")
 public class EnglishTextGeneratorController {
+
+    @Autowired
+    private EnglishTextGeneratorService englishTextGeneratorService;
 
     // 1. Restituisce la pagina con il form
     @GetMapping(produces = "text/html")
@@ -48,7 +52,7 @@ public class EnglishTextGeneratorController {
     @GetMapping("/creaStoria")
     public String creaStoria() throws Exception {
 
-        EnglishTextGeneratorMain.main(null);
+        englishTextGeneratorService.generaStoria();
         return "Storia generata con successo! Controlla su Google Drive per vedere il risultato.";
     }
 }

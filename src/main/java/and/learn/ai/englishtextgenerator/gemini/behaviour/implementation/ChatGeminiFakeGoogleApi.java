@@ -3,6 +3,7 @@ package and.learn.ai.englishtextgenerator.gemini.behaviour.implementation;
 import and.learn.ai.englishtextgenerator.gemini.behaviour.abstraction.ChatGeminiAbstract;
 
 import java.io.IOException;
+import java.util.UUID; // Import UUID
 
 public class ChatGeminiFakeGoogleApi extends ChatGeminiAbstract {
 
@@ -37,7 +38,7 @@ public class ChatGeminiFakeGoogleApi extends ChatGeminiAbstract {
     private String createFakeStory() {
         StringBuilder story = new StringBuilder();
         for (int i = 0; i < numRows; i++) {
-            story.append("**Riga n. ").append(numRow).append("\n").append("\n");
+            story.append("**Riga n. ").append(numRow).append(" - ").append(UUID.randomUUID().toString()).append("\n").append("\n");
             numRow++;
         }
 
