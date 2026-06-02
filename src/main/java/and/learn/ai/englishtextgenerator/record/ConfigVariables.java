@@ -1,4 +1,4 @@
-package and.learn.ai.englishtextgenerator;
+package and.learn.ai.englishtextgenerator.record;
 
     public record ConfigVariables(// Costanti valorizzate a runtime con valori sensibili come chiavi API o ID di documenti Drive
                               // Caricamento della chiave API e del Service Account

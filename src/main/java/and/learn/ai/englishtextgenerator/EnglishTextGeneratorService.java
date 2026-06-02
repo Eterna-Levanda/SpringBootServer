@@ -6,6 +6,8 @@ import and.learn.ai.englishtextgenerator.gemini.behaviour.abstraction.ChatGemini
 import and.learn.ai.englishtextgenerator.googleservice.DocsManager;
 import and.learn.ai.englishtextgenerator.googleservice.DriveManager;
 import and.learn.ai.englishtextgenerator.googleservice.GoogleServicesFactory;
+import and.learn.ai.englishtextgenerator.record.ConfigVariables;
+import and.learn.ai.englishtextgenerator.record.PromptForGeneratingText;
 import io.micrometer.common.util.StringUtils;
 import lombok.extern.log4j.Log4j2;
 import org.jspecify.annotations.NonNull;
@@ -109,7 +111,7 @@ public class EnglishTextGeneratorService {
         // Lettura dei documenti da Google Drive
         // File n.1 i prompt per la creazione della storia in formato Stringa
         String filePrompts = driveManager.extractNativeDocText(configVariables.docIdMainPrompt());
-        PromptForGenerateText coppiaDiPrompt = splitByString(filePrompts);
+        PromptForGeneratingText coppiaDiPrompt = splitByString(filePrompts);
         String promptIniziale = coppiaDiPrompt.firstPrompt();
         String elencoRequisitiGrammaticali = coppiaDiPrompt.secondPrompt();
 
@@ -208,12 +210,12 @@ public class EnglishTextGeneratorService {
      *
      * @return Un oggetto Pair con la parte a sinistra e la parte a destra del separatore
      */
-    private PromptForGenerateText splitByString(String input) {
+    private PromptForGeneratingText splitByString(String input) {
 
         int index = input.indexOf(SEPARATORE_PROMPT);
         String left = input.substring(0, index);
         String right = input.substring(index + SEPARATORE_PROMPT.length());
-        return new PromptForGenerateText(left, right);
+        return new PromptForGeneratingText(left, right);
     }
 
     /**
