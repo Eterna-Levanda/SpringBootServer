@@ -12,7 +12,7 @@ import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.security.GeneralSecurityException;
 
-import static and.learn.ai.englishtextgenerator.EnglishTextGeneratorMain.APPLICATION_PDF;
+import static org.springframework.http.MediaType.APPLICATION_PDF;
 
 /**
  * Classe con metodi statici che si interfaccia con Google Drive
@@ -67,7 +67,7 @@ public class DriveManager extends AbstractGoogleMananger<Drive> {
         ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
 
         // Per i file nativi Google, l'API 'export' è l'unica via per ottenere il contenuto
-        serviceClient.files().export(fileId, APPLICATION_PDF)
+        serviceClient.files().export(fileId, APPLICATION_PDF.toString())
                 .executeMediaAndDownloadTo(outputStream);
 
         return outputStream.toByteArray();

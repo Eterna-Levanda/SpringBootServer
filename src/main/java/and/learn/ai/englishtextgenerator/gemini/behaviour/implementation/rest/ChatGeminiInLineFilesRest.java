@@ -13,6 +13,7 @@ import java.net.http.HttpResponse;
 import java.util.Base64;
 
 import static and.learn.ai.englishtextgenerator.EnglishTextGeneratorMain.*;
+import static org.springframework.http.MediaType.APPLICATION_PDF;
 
 public class ChatGeminiInLineFilesRest extends ChatGeminiRestAbstract {
 
@@ -75,7 +76,7 @@ public class ChatGeminiInLineFilesRest extends ChatGeminiRestAbstract {
 
     private void addInlineData(ArrayNode parts, byte[] data) {
         ObjectNode inlineData = parts.addObject().putObject("inlineData");
-        inlineData.put("mimeType", APPLICATION_PDF);
+        inlineData.put("mimeType", APPLICATION_PDF.toString());
         //se il file fosse stato caricato, il nome del campo sarebbe file_uri
         inlineData.put("data", Base64.getEncoder().encodeToString(data));
     }

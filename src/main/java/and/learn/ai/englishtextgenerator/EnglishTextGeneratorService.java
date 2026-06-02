@@ -29,6 +29,8 @@ public class EnglishTextGeneratorService {
     //vale true se l'app viene eseguita su Google Cloud
     public static final boolean GOOGLE_CLOUD_ENABLED = StringUtils.isNotEmpty(System.getenv("google_cloud"));
 
+
+
     // Parametri applicativi
     private static final String SEPARATORE_PROMPT = "PROMPT_2";
     private static final String PATH_PROPERTIES = "src/main/resources/ai/englishtextgenerator/config/secret.properties";
@@ -58,6 +60,7 @@ public class EnglishTextGeneratorService {
     private static final String DOC_ID_SINONIMI = "docIdSinonimi";
     private static final String DOC_ID_STORIA_CREATA = "docIdStoriaCreata";
     private static final String DOC_ID_GERUND_INFINITIVE = "docIdGerundInfinitive";
+
     //contenitore di variabili di configurazione
     private final ConfigVariables configVariables;
 

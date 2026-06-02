@@ -9,8 +9,8 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
+import static org.springframework.http.MediaType.APPLICATION_PDF;
 
-import static and.learn.ai.englishtextgenerator.EnglishTextGeneratorMain.APPLICATION_PDF;
 
 public class ChatGeminiInLineFilesApi extends ChatGeminiApiAbstract {
 
@@ -31,10 +31,10 @@ public class ChatGeminiInLineFilesApi extends ChatGeminiApiAbstract {
         promptParts.add(Part.fromText(promptText));
 
         if(file1 != null) {
-            promptParts.add(Part.fromBytes(file1, APPLICATION_PDF));
+            promptParts.add(Part.fromBytes(file1, APPLICATION_PDF.toString()));
         }
         if(file1 != null) {
-            promptParts.add(Part.fromBytes(file2, APPLICATION_PDF));
+            promptParts.add(Part.fromBytes(file2, APPLICATION_PDF.toString()));
         }
 
         // Chiamata al modello
@@ -58,10 +58,10 @@ public class ChatGeminiInLineFilesApi extends ChatGeminiApiAbstract {
         currentParts.add(Part.builder().text(promptText).build());
 
         if (file1 != null && file1.length > 0) {
-            currentParts.add(Part.fromBytes(file1, APPLICATION_PDF));
+            currentParts.add(Part.fromBytes(file1, APPLICATION_PDF.toString()));
         }
         if (file2 != null && file2.length > 0) {
-            currentParts.add(Part.fromBytes(file2, APPLICATION_PDF));
+            currentParts.add(Part.fromBytes(file2, APPLICATION_PDF.toString()));
         }
 
         // 2. Creiamo il nuovo contenuto dell'utente e lo aggiungiamo alla history

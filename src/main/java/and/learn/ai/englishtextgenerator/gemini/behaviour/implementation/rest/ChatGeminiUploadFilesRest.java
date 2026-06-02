@@ -11,7 +11,7 @@ import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
 
 import static and.learn.ai.englishtextgenerator.EnglishTextGeneratorMain.*;
-
+import static org.springframework.http.MediaType.APPLICATION_PDF;
 public class ChatGeminiUploadFilesRest extends ChatGeminiRestAbstract {
 
     public static final String URL_UPLOAD = "https://generativelanguage.googleapis.com/upload/v1beta/files?key=";
@@ -73,7 +73,7 @@ public class ChatGeminiUploadFilesRest extends ChatGeminiRestAbstract {
 
             HttpRequest request = HttpRequest.newBuilder()
                     .uri(URI.create(urlApiGemini))
-                    .header("Content-Type", APPLICATION_PDF)
+                    .header("Content-Type", APPLICATION_PDF.toString())
                     .POST(HttpRequest.BodyPublishers.ofString(requestBody))
                     .build();
 
@@ -105,7 +105,7 @@ public class ChatGeminiUploadFilesRest extends ChatGeminiRestAbstract {
         HttpRequest request = HttpRequest.newBuilder()
                 .uri(URI.create(
                         URL_UPLOAD + apiKey))
-                .header("Content-Type", APPLICATION_PDF)
+                .header("Content-Type", APPLICATION_PDF.toString())
                 .header("X-Goog-Upload-Protocol", "raw")
                 .POST(HttpRequest.BodyPublishers.ofByteArray(pdfBytes))
                 .build();

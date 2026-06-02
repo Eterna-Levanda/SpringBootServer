@@ -9,6 +9,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import static and.learn.ai.englishtextgenerator.EnglishTextGeneratorMain.*;
+import static org.springframework.http.MediaType.APPLICATION_PDF;
 
 public class ChatGeminiUploadFilesApi extends ChatGeminiApiAbstract {
 
@@ -88,21 +89,21 @@ public class ChatGeminiUploadFilesApi extends ChatGeminiApiAbstract {
 
             //chiamata a Gemini per upload file 1
             File uploadedFile1 = client.files.upload(file1,
-                    UploadFileConfig.builder().mimeType(APPLICATION_PDF).displayName("Documento 1").build());
+                    UploadFileConfig.builder().mimeType(APPLICATION_PDF.toString()).displayName("Documento 1").build());
 
             // Aggiungiamo i riferimenti ai file nelle Parti del primo messaggio
             currentParts.add(Part.builder().fileData(
-                    FileData.builder().fileUri(uploadedFile1.uri().get()).mimeType(APPLICATION_PDF).build()
+                    FileData.builder().fileUri(uploadedFile1.uri().get()).mimeType(APPLICATION_PDF.toString()).build()
             ).build());
         }
 
         if (file2 != null && file2.length > 0) {
             //chiamata a Gemini per upload file 2
             File uploadedFile2 = client.files.upload(file2,
-                    UploadFileConfig.builder().mimeType(APPLICATION_PDF).displayName("Documento 2").build());
+                    UploadFileConfig.builder().mimeType(APPLICATION_PDF.toString()).displayName("Documento 2").build());
 
             currentParts.add(Part.builder().fileData(
-                    FileData.builder().fileUri(uploadedFile2.uri().get()).mimeType(APPLICATION_PDF).build()
+                    FileData.builder().fileUri(uploadedFile2.uri().get()).mimeType(APPLICATION_PDF.toString()).build()
             ).build());
         }
 
