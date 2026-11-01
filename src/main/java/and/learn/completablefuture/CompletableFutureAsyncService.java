@@ -7,6 +7,8 @@ import org.springframework.stereotype.Service;
 import java.util.concurrent.CompletableFuture;
 @Log4j2
 @Service
+/**Questa classe mostra il modo più snello e migliore per usare i CompletableFuture,
+ * lo vedi anche dalla guida ufficiale di Spring.*/
 public class CompletableFutureAsyncService {
 
     @Autowired
@@ -17,7 +19,7 @@ public class CompletableFutureAsyncService {
      * @param eseguiAllOf Se posto a true avvierà i thread con un'unica esecuzione, tramite:
      CompletableFuture.allOf(listOfCompletableFuture).join();
      per poi estrarne i risultati già pronti ciclando singolarmente sui singoli CompletableFuture,
-     come indicato nella guida ufficiale,
+     come indicato nella guida ufficiale ( https://spring.io/guides/gs/async-method)
      altrimenti i thread verranno lanciati direttamente quando si cicla
      sui singoli CompletableFuture attraverso il metodo join*/
     public String executeAsyncThreads(int numOfThreadToExecute, boolean eseguiAllOf){
@@ -57,16 +59,16 @@ public class CompletableFutureAsyncService {
 
         //Estraggo i valori dei singoli CompletableFuture presenti nell'array. Posso usare join o get.
         for(int i=0; i<numOfThreadToExecute; i++) {
-            /*Da notare che in questo caso, ovvero creando un unico CompletableFuture contenitore,
+            /*Da notare che, creando un unico CompletableFuture contenitore,
              quando eseguo join sui singoli CompletableFuture io ottengo subito il valore di ritorno dal thread solo perchè
-            prima ho invocato la join CompletableFuture contenitore.
-            Altrimenti, se avessi usato sempre e solo i singoli CompletableFuture,
+            prima ho invocato la join CompletableFuture contenitore che lanciava i thread.
+            Altrimenti, se usassi sempre e solo i singoli CompletableFuture,
             adesso che in questo ciclo io invoco il metodo join,
             ad ogni esecuzione vedrei eseguirsi i vari thread,
-            e aspetterei ogni volta che finiscano di essere eseguiti.
-            La tecnica qui presente è la migliore perchè esposta nella documentazione ufficiale:
-            https://spring.io/guides/gs/async-method*/
+            e aspetterei ogni volta che finiscano di essere eseguiti.*/
+
             log.info("Estraggo il valore ottenuto eseguendo il thread n. " + (i+1) + " ==> " + listOfCompletableFuture[i].join());
+
         }
 
         //fermo il cronometro e stampo la durata di esecuzione di tutti i thread
