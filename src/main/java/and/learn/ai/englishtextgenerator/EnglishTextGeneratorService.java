@@ -68,9 +68,7 @@ public class EnglishTextGeneratorService {
         log.info("Avvio EnglishTextGeneratorService ");
 
         System.out.println("Working directory: " + System.getProperty("user.dir"));
-
         System.out.println("Percorso assoluto: " + Path.of(PATH_PROPERTIES).toAbsolutePath());
-
         System.out.println("File esistente: " + Files.exists(Path.of(PATH_PROPERTIES)));
 
         //inizializzazione delle costanti tramite file di properties
