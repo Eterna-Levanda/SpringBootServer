@@ -1,4 +1,4 @@
-package and.learn.completablefuture;
+package and.learn.thread.completablefuture;
 
 import java.util.*;
 import java.util.concurrent.*;

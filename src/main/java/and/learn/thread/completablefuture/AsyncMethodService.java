@@ -1,4 +1,4 @@
-package and.learn.completablefuture;
+package and.learn.thread.completablefuture;
 
 import lombok.extern.log4j.Log4j2;
 import org.springframework.scheduling.annotation.Async;

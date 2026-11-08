@@ -1,4 +1,4 @@
-package and.learn.future;
+package and.learn.thread.future;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -20,34 +20,43 @@ import java.util.concurrent.*;
  */
 public class FutureExecutorServiceMain {
 
-    private static final int NUM_PROPOSTE = 5;
-    //dimensione del pool: se è minore di NUM_PROPOSTE, i task in eccesso aspettano in coda un thread libero
-    private static final int NUM_THREAD = 3;
+    private static final int THREAD_DA_CREARE = 5;
+    private static final int NUM_THREAD_IN_PARALLELO = 3;
     private static final long TIMEOUT_SECONDI = 300;
 
     public static void main(String[] args) {
 
-        ExecutorService executor = Executors.newFixedThreadPool(NUM_THREAD);
-        List<Future<DatiPolizza>> listaFuture = new ArrayList<>();
-        List<DatiPolizza> risultati = new ArrayList<>();
+       // eseguiThreadConSubmit();
+
+        eseguiThreadConInvokeAll();
+    }
+
+    private static void eseguiThreadConSubmit() {
+        ExecutorService executor = Executors.newFixedThreadPool(NUM_THREAD_IN_PARALLELO);
+        //lista contenente i risultati
+        List<Future<NumeroIntero>> listaFuture = new ArrayList<>();
+        List<NumeroIntero> risultati = new ArrayList<>();
 
         try {
             // 1) sottometto i task: ogni submit avvia (o mette in coda) il thread e restituisce subito un Future
-            for (int input = 1; input <= NUM_PROPOSTE; input++) {
-                CalcolaPremioCallable callable = new CalcolaPremioCallable(input);
-                Future<DatiPolizza> future = executor.submit(callable);
-                listaFuture.add(future);
+            for (int input = 1; input <= THREAD_DA_CREARE; input++) {
+                CalcolaDoppioCallable callable = new CalcolaDoppioCallable(input);
+                /*consegno (sottometto) i Callable all'ExecutorService uno alla volta (nell'altro esempio invece tutti assieme)
+                In questa fase i future non contengono ancora i risultati, sono solo dei contenitori vuoti
+                 */
+                Future<NumeroIntero> futureConIlRisultato = executor.submit(callable);
+                listaFuture.add(futureConIlRisultato);
             }
             System.out.println("Tutti i task sono stati sottomessi, il main prosegue senza aspettare");
 
             // 2) recupero i risultati: get() BLOCCA il thread main finché quel Future non è completato
-            for (Future<DatiPolizza> future : listaFuture) {
+            for (Future<NumeroIntero> future : listaFuture) {
                 try {
                     /* get con timeout: se il risultato non arriva entro il tempo indicato lancia TimeoutException.
                        Esiste anche get() senza parametri che aspetta all'infinito */
-                    DatiPolizza dp = future.get(TIMEOUT_SECONDI, TimeUnit.SECONDS);
-                    risultati.add(dp);
-                    System.out.println("Risultato ricevuto: " + dp);
+                    NumeroIntero doppio = future.get(TIMEOUT_SECONDI, TimeUnit.SECONDS);
+                    risultati.add(doppio);
+                    System.out.println("Risultato ricevuto dal thread: " + doppio.getNomeThread() +" = " + doppio.getNumero());
                 } catch (ExecutionException e) {
                     // il Callable ha lanciato un'eccezione: la causa originale è in getCause()
                     System.err.println("Errore nel thread: " + e.getCause().getMessage());
@@ -65,10 +74,7 @@ public class FutureExecutorServiceMain {
             chiudiExecutor(executor);
         }
 
-        System.out.println("Risultati finali (" + risultati.size() + "/" + NUM_PROPOSTE + "): " + risultati);
-
-        //esempio alternativo con invokeAll, decommenta per provarlo
-        //esempioInvokeAll();
+        System.out.println("Risultati finali (" + risultati.size() + "/" + THREAD_DA_CREARE + "): " + risultati);
     }
 
     /**
@@ -76,23 +82,27 @@ public class FutureExecutorServiceMain {
      * restituendo la lista dei Future già completati (get() quindi non blocca più).
      * Con il timeout, i task non terminati in tempo vengono cancellati.
      */
-    private static void esempioInvokeAll() {
-        ExecutorService executor = Executors.newFixedThreadPool(NUM_THREAD);
+    private static void eseguiThreadConInvokeAll() {
+        ExecutorService executor = Executors.newFixedThreadPool(NUM_THREAD_IN_PARALLELO);
         try {
-            List<Callable<DatiPolizza>> callables = new ArrayList<>();
-            for (int input = 1; input <= NUM_PROPOSTE; input++) {
-                callables.add(new CalcolaPremioCallable(input));
+
+            //creo una lista di Callable, ognuno di loro ha in input il numero di cui calcolare il doppio
+            List<Callable<NumeroIntero>> callables = new ArrayList<>();
+            for (int input = 1; input <= THREAD_DA_CREARE; input++) {
+                callables.add(new CalcolaDoppioCallable(input));
             }
 
-            List<Future<DatiPolizza>> listaFuture = executor.invokeAll(callables, TIMEOUT_SECONDI, TimeUnit.SECONDS);
+            /* consegno all'ExecutorService i Callable tutti assieme (nell'altro metodo li consegno/submit uno alla volta)
+                e ottengo una lista di Future. Quindi input e output è di tipo List*/
+            List<Future<NumeroIntero>> listaFuture = executor.invokeAll(callables, TIMEOUT_SECONDI, TimeUnit.SECONDS);
 
-            for (Future<DatiPolizza> future : listaFuture) {
+            for (Future<NumeroIntero> future : listaFuture) {
                 if (future.isCancelled()) {
                     System.err.println("Task cancellato per timeout");
                     continue;
                 }
                 try {
-                    System.out.println("Risultato invokeAll: " + future.get());
+                    System.out.println("Risultato ricevuto dal thread: " + future.get().getNomeThread() +" = " + future.get().getNumero());
                 } catch (ExecutionException e) {
                     System.err.println("Errore nel thread: " + e.getCause().getMessage());
                 }
