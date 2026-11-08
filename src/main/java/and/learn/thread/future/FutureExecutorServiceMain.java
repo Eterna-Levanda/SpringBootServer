@@ -4,6 +4,8 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.*;
 
+import lombok.extern.log4j.Log4j2;
+
 /**
  * Esempio d'uso dell'interfaccia Future con ExecutorService (approccio "classico", pre CompletableFuture).
  *
@@ -18,6 +20,7 @@ import java.util.concurrent.*;
  * get() serve solo ad aspettare la fine del thread e a leggerne il risultato.
  * Mentre aspetto il primo Future, gli altri thread stanno già lavorando in parallelo.
  */
+@Log4j2
 public class FutureExecutorServiceMain {
 
     private static final int THREAD_DA_CREARE = 5;
@@ -26,7 +29,8 @@ public class FutureExecutorServiceMain {
 
     public static void main(String[] args) {
 
-       // eseguiThreadConSubmit();
+        //due modi diversi per eseguire i thread: lanciare i thread uno alla volta o tutti assieme
+        eseguiThreadConSubmit();
 
         eseguiThreadConInvokeAll();
     }
@@ -47,7 +51,7 @@ public class FutureExecutorServiceMain {
                 Future<NumeroIntero> futureConIlRisultato = executor.submit(callable);
                 listaFuture.add(futureConIlRisultato);
             }
-            System.out.println("Tutti i task sono stati sottomessi, il main prosegue senza aspettare");
+            log.info("Tutti i task sono stati sottomessi, il main prosegue senza aspettare");
 
             // 2) recupero i risultati: get() BLOCCA il thread main finché quel Future non è completato
             for (Future<NumeroIntero> future : listaFuture) {
@@ -56,12 +60,12 @@ public class FutureExecutorServiceMain {
                        Esiste anche get() senza parametri che aspetta all'infinito */
                     NumeroIntero doppio = future.get(TIMEOUT_SECONDI, TimeUnit.SECONDS);
                     risultati.add(doppio);
-                    System.out.println("Risultato ricevuto dal thread: " + doppio.getNomeThread() +" = " + doppio.getNumero());
+                    log.info("Risultato ricevuto dal thread: {} = {}", doppio.getNomeThread(), doppio.getNumero());
                 } catch (ExecutionException e) {
                     // il Callable ha lanciato un'eccezione: la causa originale è in getCause()
-                    System.err.println("Errore nel thread: " + e.getCause().getMessage());
+                    log.error("Errore nel thread: {}", e.getCause().getMessage());
                 } catch (TimeoutException e) {
-                    System.err.println("Timeout superato, annullo il task");
+                    log.error("Timeout superato, annullo il task");
                     // true = interrompe il thread se è in esecuzione
                     future.cancel(true);
                 }
@@ -74,7 +78,7 @@ public class FutureExecutorServiceMain {
             chiudiExecutor(executor);
         }
 
-        System.out.println("Risultati finali (" + risultati.size() + "/" + THREAD_DA_CREARE + "): " + risultati);
+        log.info("Risultati finali ({}/{}): {}", risultati.size(), THREAD_DA_CREARE, risultati);
     }
 
     /**
@@ -98,13 +102,13 @@ public class FutureExecutorServiceMain {
 
             for (Future<NumeroIntero> future : listaFuture) {
                 if (future.isCancelled()) {
-                    System.err.println("Task cancellato per timeout");
+                    log.error("Task cancellato per timeout");
                     continue;
                 }
                 try {
-                    System.out.println("Risultato ricevuto dal thread: " + future.get().getNomeThread() +" = " + future.get().getNumero());
+                    log.info("Risultato ricevuto dal thread: {} = {}", future.get().getNomeThread(), future.get().getNumero());
                 } catch (ExecutionException e) {
-                    System.err.println("Errore nel thread: " + e.getCause().getMessage());
+                    log.error("Errore nel thread: {}", e.getCause().getMessage());
                 }
             }
         } catch (InterruptedException e) {
